@@ -3,6 +3,9 @@
 @tailwind utilities;
 
 @layer base {
+  *{
+    @apply text-[clamp(0.90rem,1vw,2rem)]
+  }
   button {
     @apply rounded-lg px-4 m-4 border-2 cursor-pointer;
   }
@@ -12,5 +15,8 @@
 
   label {
     @apply text-left;
+  }
+  li{
+    @apply bg-white;
   }
 }

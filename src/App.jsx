@@ -23,6 +23,7 @@ import { db } from '../firebasedb';
 function App() {
   const [isOpenEdit, setIsOpenEdit] = useState(false);
   const [isOpenSave, setIsOpenSave] = useState(false);
+  const [tipoCard, setTipoCard] = useState("");
 
   const [ItemRef, setItemRef] = useState([]);
   const [listaDados, setListaDados] = useState([]);
@@ -35,6 +36,43 @@ function App() {
     categoria: '',
   });
   const ref = collection(db, 'despesas');
+
+  function tratarPeriodo(valorOriginal){
+    const [data, hora] = valorOriginal.split("T"); // separa em ['2025-07-04', '11:09']
+    const [ano, mes, dia] = data.split("-"); // separa em ['2025', '07', '04']
+
+    const formatado = `${dia}/${mes}/${ano} ${hora}`;
+    console.log(formatado); // 04/07/2025 11:09
+
+    return formatado;
+
+  }
+
+  function getCategoriaStyle(categoria){
+    switch (categoria) {
+      case "Alimentação":
+        return "bg-yellow-500 text-white"
+      
+      case "Higiene":
+        return "bg-blue-500 text-white"
+
+      case "Transporte":
+        return "bg-gray-400 text-white"
+
+      case "Saúde":
+        return "bg-blue-200 text-white"
+
+      case "Entretenimento":
+        return "bg-red-400 text-white"      
+      
+      case "Moradia":
+        return "bg-[#5c4323] text-white"
+    
+      default:
+        console.log("Olha a categoria", categoria);
+        return "bg-black text-white"
+    }
+  }
 
   function closeModalEdit() {
     setIsOpenEdit(false);
@@ -101,16 +139,37 @@ function App() {
       // Processamento normal
       const novosDados = querySnapshot.docs.map((doc) => {
         const dados = doc.data();
+
+        let typecard = ""; // declara primeiro
+        if (dados.tipo === "Receita") {
+          typecard = "src/assets/mais_card.png"
+          setTipoCard(typecard);;
+        } else if (dados.tipo === "Despesa") {
+          typecard = "src/assets/menos_card.png"
+          setTipoCard(typecard);;
+        } else {
+          const olha= dados.tipo
+          typecard = olha
+          setTipoCard(typecard);
+        }
         return {
           id: doc.id,
           ...dados,
           periodo: dados.periodo ? converterTimestamp(dados.periodo) : null,
         };
+        
+
       });
 
       // DEBUG 3: Verifica o resultado final
       console.log('✅ Dados processados:', novosDados);
       setListaDados(novosDados);
+      
+
+
+
+
+
     });
 
     return unsubscribe;
@@ -213,8 +272,9 @@ function App() {
   return (
     <>
       <header>
-        <nav>
-          <h1>Minhas Despesas</h1>
+        <nav className='p-3 rounded-lg bg-[#f6f6f6]'>
+          <img src="" alt="" />
+          <h1 className="text-start text-3xl font-bold ">Minhas Despesas</h1>
         </nav>
       </header>
 
@@ -226,45 +286,78 @@ function App() {
         </section>
         <section id="busca">
           <div id="filtros-busca"></div>
-          <span id="barra-busca"></span>
+          <span id="barra-busca">
+            <input type="text" />
+            <button>Buscar</button>
+
+          </span>
+          <span id="add">
+            <button onClick={() => OpenModalSave()} id="edit">
+              Adicionar
+            </button>
+          </span>
         </section>
-        <section id="dados"></section>
+        <section id="dados" className='p-4 rounded-lg bg-[#f6f6f6]'>
+          <ul className="list-none gap-4 flex flex-wrap justify-center">
+            {listaDados.map((item, index) => (
+              <li
+                className="list-none rounded-lg border-2 flex flex-row justify-center max-w-[250px] max-h-[350px] w-full h-auto min-w-[195px] min-h-[90px]"
+                key={item.id}
+                id={item.id}
+              >
+
+                <span id="main" className="flex flex-col justify-around m-2">
+                    <span id="body-card" className="min-w-[120px] flex flex-row gap-[3rem]">
+                    
+                      <span id="header">
+                        <span id="img-header" className='flex flex-row items-start gap-2'>
+                          <img
+                            className='max-w-[25px] max-h-[25px] w-full h-full'
+                            src={tipoCard}
+                            alt=""
+                          />
+                          <span id="info-header" className='text-start'>
+                            <p className="" id="descricao">{item.descricao}</p>
+                            <hr className="border-t w-[100px] border-gray-300  " />
+                            <p>R$ {item.valor},00</p>
+                          </span>
+                        </span>
+        
+                      </span>
+
+                    <span id="aside-card" className="flex flex-col max-w-[30px] justify-around max-h-[60px] min-w-[25px] min-h-[65px]">
+                  
+                      <button className="p-1 m-1  max-w-[25px] max-h-[25px] w-full h-full" onClick={() => removerItem(item.id)}>
+                        <img src="src/assets/trash.png" className="" alt="" />
+                      </button>
+
+                      <button className="p-1  m-1 max-w-[25px] max-h-[25px] w-full h-full" onClick={() => OpenModalEdit(item)} id="edit">
+                        <img src="src/assets/edit.png" alt="" />
+                      </button>
+
+                    </span>                
+                    
+                    </span>
+              
+                      <span id="footer-card" className='flex flex-row justify-around w-full max-h-[30px] h-full gap-1'>
+                        <p className={`max-h-[30px]  ${getCategoriaStyle(item.categoria)} border-2 p-1 rounded-lg`}>{item.categoria}</p>
+                        <p className='max-h-[50px] text-end pt-2 w-full'>{tratarPeriodo(item.periodo)}</p>
+                    
+                      </span>
+                </span>
+
+              </li>
+            ))}
+          </ul>
+
+        </section>
       </main>
-      <button onClick={() => OpenModalSave()} id="edit">
-        Adicionar
-      </button>
+
 
       <div>
-        <h1 className="text-3xl font-bold text-blue-600">Oi 💙</h1>
 
         {/* Adicionar registro*/}
 
-        <p>aqui são todas as transações registradas</p>
-
-        <ul className="list-none">
-          {listaDados.map((item, index) => (
-            <li
-              className="list-none border-2 m-2 rounded-lg p-px"
-              key={item.id}
-              id={item.id}
-            >
-              <span id="head-card" className="">
-                <img
-                  src="./assets/mais_card.png"
-                  alt=""
-                />
-              </span>
-              <span id="body-card" className=""></span>
-              <span id="footer-card" className=""></span>
-              <p id="descricao">{item.descricao}</p>
-              <p>Valor: {item.valor}</p>
-              <button onClick={() => removerItem(item.id)}>Remover</button>
-              <button onClick={() => OpenModalEdit(item)} id="edit">
-                Editar
-              </button>
-            </li>
-          ))}
-        </ul>
 
         <Dialog open={isOpenEdit} onClose={() => setIsOpenEdit(false)}>
           <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
@@ -334,8 +427,8 @@ function App() {
                   }
                   required
                 >
-                  <option value="7">Receita</option>
-                  <option value="8">Despesa</option>
+                  <option value="Receita">Receita</option>
+                  <option value="Depesa">Despesa</option>
                 </select>
                 <div>
                   <button onClick={() => closeModalEdit()}>Cancelar</button>
@@ -374,9 +467,12 @@ function App() {
                   required
                   className="border-1"
                 >
-                  <option>Alimento</option>
-                  <option>Higiene</option>
-                  <option>Fatura</option>
+                  <option value="Alimentação" >Alimento</option >
+                  <option value="Higiene" >Higiene</option >
+                  <option value="Transporte" >Transporte</option>
+                  <option value="Saúde">Saúde</option>
+                  <option value="Moradia">Moradia</option>
+                  <option value="Entretenimento">Entretenimento</option>
                 </select>
 
                 <label htmlFor="">Periodo</label>
