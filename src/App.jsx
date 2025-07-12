@@ -24,9 +24,14 @@ function App() {
   const [isOpenEdit, setIsOpenEdit] = useState(false);
   const [isOpenSave, setIsOpenSave] = useState(false);
   const [tipoCard, setTipoCard] = useState("");
-
+  const [despesaDash, setDespesaDash] = useState([])
   const [ItemRef, setItemRef] = useState([]);
   const [listaDados, setListaDados] = useState([]);
+  const [listaDespesa, setListaDespesa] = useState([])
+  const [listaReceita, setListaReceita] = useState([])
+  const [despesa, setDespesa] = useState()
+  const [receita, setReceita] = useState()
+  const [saldo, setSaldo] = useState()
   const [dadosEdit, setDadosEdit] = useState({
     id: '',
     descricao: '',
@@ -46,6 +51,54 @@ function App() {
 
     return formatado;
 
+  }
+
+async function buscarDespesa() {
+  const ref = collection(db, "despesas");
+
+  // ⬇️ Aqui aplicamos o filtro
+  const filtro = query(ref, where("categoria", "==", "Despesa"));
+
+  const resultado = onSnapshot(filtro, (querySnapshot) => {
+    console.log("🚨 querySnapshot recebida:", querySnapshot);
+
+    querySnapshot.docs.forEach((doc, index) => {
+      console.log(`📄 Documento DA Despesa ${index + 1}:`, {
+        id: doc.id,
+        dadosBrutos: doc.data(),
+        timestampBruto: doc.data().periodo,
+      });
+    });
+
+    const novosDados = querySnapshot.docs.map((doc) => {
+      const dados = doc.data();
+
+      return {
+        id: doc.id,
+        ...dados,
+        periodo: dados.periodo ? converterTimestamp(dados.periodo) : null,
+      };
+    });
+
+    console.log("✅ Dados processados:", novosDados);
+    setDespesaDash(novosDados);
+  });
+
+  return resultado; // ✅ agora sim retorna a função que pode ser usada no cleanup
+}
+
+  function getTipoImg(tipo){
+    switch (tipo) {
+      case "Despesa":
+        return "src/assets/menos_card.png"
+      
+      case "Receita":
+        return "src/assets/mais_card.png"
+
+      default:
+        console.log("Tipo não identificado", tipo);
+        return `Tipo não identidicado ${tipo}`
+    }
   }
 
   function getCategoriaStyle(categoria){
@@ -102,6 +155,54 @@ function App() {
     setIsOpenSave(true);
   }
 
+  function CalcularDespesa(listaDespesa){
+    
+    var totalD = 0;
+    listaDespesa.forEach(u => {
+      totalD += parseFloat(u);
+    });
+    return totalD
+  }
+  
+  function CalcularReceita(listaReceita){
+    
+    var totalR = 0;
+    listaReceita.forEach(e => {
+      totalR += parseFloat(e);
+    });
+    return totalR
+  }
+
+  function CalcularSaldo(receita, despesa){
+    var x = 0;
+    x = receita - despesa;
+    return x
+  }
+
+  const [valor, setValor] = useState("");
+
+function handleChange(e) {
+  const valorDigitado = e.target.value;
+  const valorFormatado = formatarParaReaisInput(valorDigitado);
+  setValor(valorFormatado);
+}
+
+  function formatarParaReais(valor) {
+  return parseFloat(valor).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+}
+
+function formatarParaReaisInput(valor) {
+  valor = valor.replace(/\D/g, ""); // remove tudo que não for número
+  valor = (Number(valor) / 100).toFixed(2); // divide por 100 e mantém duas casas decimais
+  return valor
+    .toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+    
+             
   useEffect(() => {
     console.log('[DEBUG] Chamando buscarDados()...');
     const unsubscribe = buscarDados();
@@ -118,8 +219,57 @@ function App() {
       } else {
         console.warn('[DEBUG] Nada para limpar - unsubscribe não é função');
       }
-    };
+    };      
+  }, []);  
+
+  useEffect(() => {
+    const unsubscribe = buscarPorTipo("Despesa", (dados) => {
+      // aqui você pode setar no estado, por exemplo
+      setDespesaDash(dados);
+
+      var listaD = []
+      dados.forEach(e => {
+          listaD.push(e.valor)
+      });
+      setListaDespesa(listaD);
+
+      console.log("Aqui dados", dados)
+      console.log("Aqui é a lista despesa: ", listaDespesa)
+    });
+
+    return () => unsubscribe?.();
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = buscarPorTipo("Receita", (dados) => {
+      // aqui você pode setar no estado, por exemplo
+      // setDespesaDash(dados);
+
+      var listaR = []
+      dados.forEach(e => {
+          listaR.push(e.valor)
+      });
+      setListaReceita(listaR);
+
+      console.log("Aqui dados", dados)
+      console.log("Aqui é a lista Receita: ", listaReceita)
+    });
+
+    return () => unsubscribe?.();
+  }, []);
+
+  useEffect(() => {
+    const D = CalcularDespesa(listaDespesa)
+    const R = CalcularReceita(listaReceita)
+    setDespesa(D)
+    setReceita(R)
+  }, [listaDespesa, listaReceita])
+
+  useEffect(() => {
+      console.log("Receita", receita)
+      console.log("Despesa", despesa)
+  },[receita,despesa])
+
 
   // READ - LER
   async function buscarDados() {
@@ -140,18 +290,22 @@ function App() {
       const novosDados = querySnapshot.docs.map((doc) => {
         const dados = doc.data();
 
-        let typecard = ""; // declara primeiro
-        if (dados.tipo === "Receita") {
-          typecard = "src/assets/mais_card.png"
-          setTipoCard(typecard);;
-        } else if (dados.tipo === "Despesa") {
-          typecard = "src/assets/menos_card.png"
-          setTipoCard(typecard);;
-        } else {
-          const olha= dados.tipo
-          typecard = olha
-          setTipoCard(typecard);
-        }
+        console.log("Aqui é o tipo do doc ", dados.tipo)
+        // let typecard = ""; // declara primeiro
+        // if (dados.tipo === "Receita") {
+        //   typecard = "src/assets/mais_card.png"
+        //   setTipoCard(typecard);
+        // } else if (dados.tipo === "Despesa") {
+        //   const olha= dados.tipo
+        //   typecard = "src/assets/menos_card.png"
+        //   setTipoCard(typecard);
+        // } else {
+        //   const olha= dados.tipo
+        //   typecard = olha44
+        //   setTipoCard(typecard);
+        // }
+
+
         return {
           id: doc.id,
           ...dados,
@@ -164,16 +318,13 @@ function App() {
       // DEBUG 3: Verifica o resultado final
       console.log('✅ Dados processados:', novosDados);
       setListaDados(novosDados);
-      
-
-
-
 
 
     });
 
     return unsubscribe;
   }
+
   function converterTimestamp(dadoBruto) {
     if (dadoBruto && typeof dadoBruto.seconds === 'number') {
       const date = new Date(dadoBruto.seconds * 1000);
@@ -185,6 +336,24 @@ function App() {
       return dadoBruto;
     }
   }
+
+  function buscarPorTipo(tipoDesejado, callback) {
+  const ref = collection(db, "despesas");
+  const filtro = query(ref, where("tipo", "==", tipoDesejado));
+
+  const unsubscribe = onSnapshot(filtro, (querySnapshot) => {
+    const dadosFiltrados = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    
+    console.log(`[DEBUG] Documentos do tipo "${tipoDesejado}":`, dadosFiltrados);
+    if (callback) callback(dadosFiltrados);
+  });
+
+  return unsubscribe;
+}
 
   // CREATE - SALVAR
   function salvarDados(e) {
@@ -279,24 +448,50 @@ function App() {
       </header>
 
       <main>
-        <section id="dash">
-          <div className="card-dash" id="menos"></div>
-          <div className="card-dash" id="mais"></div>
-          <div className="card-dash" id="atual"></div>
-        </section>
-        <section id="busca">
-          <div id="filtros-busca"></div>
-          <span id="barra-busca">
-            <input type="text" />
-            <button>Buscar</button>
+        <section id="dash" className='flex p-2 gap-4 flex-row flex-wrap justify-center'>
 
+          <div className="card-dash bg-green-100" id="mais">
+            <h1 className="text-start m-2">Receitas</h1>
+            <p className='text-lg m-2'>
+              {formatarParaReais(CalcularReceita(listaReceita))}
+            </p>
+          </div>
+
+          <div className="card-dash bg-red-100" id="menos">
+            <h1 className="text-start m-2">Depesas</h1>
+            <p className='text-lg m-2'>
+              {formatarParaReais( CalcularDespesa(listaDespesa))}
+            </p>
+          </div>
+
+
+          <div className="card-dash" id="atual">
+            <h1 className="text-start m-2">Saldo Atual</h1>
+            <p className='text-lg m-2'>
+              {formatarParaReais(CalcularSaldo(receita,despesa))}
+            </p>
+          </div>
+
+        </section>
+
+        <section id="busca" className='flex flex-row'>
+          <div id="filtros-busca" className='flex flex-row items-center'>
+            <h1>Filtros</h1>
+            <button>/</button>
+          </div>
+
+          <span id="barra-busca">
+            <input type="text"/>
+            <button>Buscar</button>
           </span>
+
           <span id="add">
             <button onClick={() => OpenModalSave()} id="edit">
               Adicionar
-            </button>
+          </button>
           </span>
         </section>
+
         <section id="dados" className='p-4 rounded-lg bg-[#f6f6f6]'>
           <ul className="list-none gap-4 flex flex-wrap justify-center">
             {listaDados.map((item, index) => (
@@ -313,13 +508,13 @@ function App() {
                         <span id="img-header" className='flex flex-row items-start gap-2'>
                           <img
                             className='max-w-[25px] max-h-[25px] w-full h-full'
-                            src={tipoCard}
+                            src={getTipoImg(item.tipo)}
                             alt=""
                           />
                           <span id="info-header" className='text-start'>
                             <p className="" id="descricao">{item.descricao}</p>
                             <hr className="border-t w-[100px] border-gray-300  " />
-                            <p>R$ {item.valor},00</p>
+                            <p>{formatarParaReais(item.valor)}</p>
                           </span>
                         </span>
         
@@ -385,6 +580,7 @@ function App() {
                   value={dadosEdit.valor}
                   onChange={(e) =>
                     setDadosEdit({ ...dadosEdit, valor: e.target.value })
+                    
                   }
                   required
                 />
@@ -428,7 +624,7 @@ function App() {
                   required
                 >
                   <option value="Receita">Receita</option>
-                  <option value="Depesa">Despesa</option>
+                  <option value="Despesa">Despesa</option>
                 </select>
                 <div>
                   <button onClick={() => closeModalEdit()}>Cancelar</button>
@@ -458,6 +654,9 @@ function App() {
                   name="valorSave"
                   required
                   type="number"
+
+                  value={valor}
+                  onChange={handleChange}
                 />
 
                 <label htmlFor="">Categoria</label>
