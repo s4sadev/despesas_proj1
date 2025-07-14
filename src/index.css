@@ -20,6 +20,6 @@
     @apply bg-white;
   }
   #dash div{
-    @apply min-h-[50px] min-w-[250px] max-w-[300px] w-full font-bold border-2 text-lg h-full m-2 p-2 text-center;
+    @apply min-h-[50px] min-w-[100px] max-w-[190px] w-full font-bold border-2 text-lg h-full m-2 p-2 text-center;
   }
 }

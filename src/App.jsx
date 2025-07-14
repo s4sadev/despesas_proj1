@@ -17,13 +17,16 @@ import {
   DialogTitle,
   DialogPanel,
   Transition,
+  Disclosure, 
+  DisclosureButton, 
+  DisclosurePanel ,
 } from '@headlessui/react';
 import { db } from '../firebasedb';
 
 function App() {
   const [isOpenEdit, setIsOpenEdit] = useState(false);
   const [isOpenSave, setIsOpenSave] = useState(false);
-  const [tipoCard, setTipoCard] = useState("");
+  // const [tipoCard, setTipoCard] = useState("");
   const [despesaDash, setDespesaDash] = useState([])
   const [ItemRef, setItemRef] = useState([]);
   const [listaDados, setListaDados] = useState([]);
@@ -31,6 +34,9 @@ function App() {
   const [listaReceita, setListaReceita] = useState([])
   const [despesa, setDespesa] = useState()
   const [receita, setReceita] = useState()
+  const [filtros, setFiltros] = useState(false)
+
+  const [tipoFiltro, setTipoFiltro] = useState(" ")
   const [saldo, setSaldo] = useState()
   const [dadosEdit, setDadosEdit] = useState({
     id: '',
@@ -41,6 +47,8 @@ function App() {
     categoria: '',
   });
   const ref = collection(db, 'despesas');
+
+
 
   function tratarPeriodo(valorOriginal){
     const [data, hora] = valorOriginal.split("T"); // separa em ['2025-07-04', '11:09']
@@ -222,6 +230,29 @@ function formatarParaReaisInput(valor) {
     };      
   }, []);  
 
+
+  const [tipoFiltroLista, setTipoFiltroLista]= useState([])
+
+  useEffect(() => {
+    const unsubscribe = buscarPorTipo(tipoFiltro, (dados) => {
+      // aqui você pode setar no estado, por exemplo
+      var listaX = []
+      dados.forEach(e => {
+          listaX.push(e)
+      });
+
+      setTipoFiltroLista(listaX)
+      setListaDados(listaX)
+      console.log("Aqui dados", dados)
+      console.log("Aqui é a lista: ", tipoFiltro)
+    });
+
+
+    return () => unsubscribe?.();
+  }, [tipoFiltro]);
+
+
+
   useEffect(() => {
     const unsubscribe = buscarPorTipo("Despesa", (dados) => {
       // aqui você pode setar no estado, por exemplo
@@ -236,6 +267,7 @@ function formatarParaReaisInput(valor) {
       console.log("Aqui dados", dados)
       console.log("Aqui é a lista despesa: ", listaDespesa)
     });
+
 
     return () => unsubscribe?.();
   }, []);
@@ -337,9 +369,14 @@ function formatarParaReaisInput(valor) {
     }
   }
 
-  function buscarPorTipo(tipoDesejado, callback) {
-  const ref = collection(db, "despesas");
-  const filtro = query(ref, where("tipo", "==", tipoDesejado));
+ function buscarPorTipo(tipoDesejado, callback) {
+    
+  var filtro = query(ref, where("tipo", "==", tipoDesejado));
+    
+  if(tipoDesejado == " "){
+      filtro = ref;
+      console.log(filtro)
+    }
 
   const unsubscribe = onSnapshot(filtro, (querySnapshot) => {
     const dadosFiltrados = querySnapshot.docs.map((doc) => ({
@@ -438,6 +475,21 @@ function formatarParaReaisInput(valor) {
     }
   }
 
+  function identificarTipo(e){ 
+    const tipoFiltro = e.target.value
+
+    setTipoFiltro(tipoFiltro)
+  }
+
+  function statusFiltros(status){
+    if(status == false){
+      return "hidden"
+    }
+    else{
+      console.log(status)
+      return " "
+    }
+  }
   return (
     <>
       <header>
@@ -448,7 +500,7 @@ function formatarParaReaisInput(valor) {
       </header>
 
       <main>
-        <section id="dash" className='flex p-2 gap-4 flex-row flex-wrap justify-center'>
+        <section id="dash" className='flex gap-13 flex-row flex-wrap justify-center'>
 
           <div className="card-dash bg-green-100" id="mais">
             <h1 className="text-start m-2">Receitas</h1>
@@ -474,26 +526,51 @@ function formatarParaReaisInput(valor) {
 
         </section>
 
-        <section id="busca" className='flex flex-row'>
-          <div id="filtros-busca" className='flex flex-row items-center'>
-            <h1>Filtros</h1>
-            <button>/</button>
+        <section id="busca" className='flex flex-row justify-around items-center'>
+          <div id="filtros-busca" className={`flex flex-col items-center`}>
+
+            <div className='flex items-center'> 
+
+              <Disclosure>
+                <span className='flex flex-col justify-center items-center'>
+                <DisclosureButton>
+                  <button className='g-transparent border-none outline-none p-0 m-0 shadow-none' onClick={(e) => setFiltros(!filtros)}>Filtros seta</button>
+                </DisclosureButton>
+
+                <DisclosurePanel>
+                <div className={`flex flex-row items-center`}>
+                  <select name="" id="" onChange={(e)=> identificarTipo(e)}>
+                    <option className="" selected value=" ">------</option>
+                    <option className="" value="Receita">Receitas</option>
+                    <option className="" value="Despesa">Despesas</option>
+                  </select>
+                </div>
+
+                </DisclosurePanel>
+                </span>
+              </Disclosure>
+
+              <span id="barra-busca">
+                <input type="text"/>
+              </span>
+
+            </div>
+
+
           </div>
 
-          <span id="barra-busca">
-            <input type="text"/>
-            <button>Buscar</button>
-          </span>
 
           <span id="add">
             <button onClick={() => OpenModalSave()} id="edit">
               Adicionar
           </button>
           </span>
+          
+
         </section>
 
-        <section id="dados" className='p-4 rounded-lg bg-[#f6f6f6]'>
-          <ul className="list-none gap-4 flex flex-wrap justify-center">
+        <section id="dados" className='p-4 rounded-lg bg-[#f6f6f6]' flex justify-between>
+          <ul className="list-none gap-4 flex flex-wrap items-start justify-center">
             {listaDados.map((item, index) => (
               <li
                 className="list-none rounded-lg border-2 flex flex-row justify-center max-w-[250px] max-h-[350px] w-full h-auto min-w-[195px] min-h-[90px]"
@@ -704,6 +781,8 @@ function formatarParaReaisInput(valor) {
       </div>
     </>
   );
+
+
 }
 
 export default App;
