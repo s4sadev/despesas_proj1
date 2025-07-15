@@ -22,6 +22,7 @@ import {
   DisclosureButton, 
   DisclosurePanel ,
 } from '@headlessui/react';
+
 import { db } from '../firebasedb';
 
 function App() {
@@ -154,6 +155,7 @@ async function buscarDespesa() {
       });
     }
     setIsOpenEdit(true);
+    setValor(item.valor)
   }
 
   function closeModalSave() {
@@ -228,6 +230,26 @@ function formatarParaReaisInput(valor) {
     .toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+function formatarValor(valor) {
+  // Remove tudo que não for número ou vírgula
+  let valorNumerico = valor.replace(/[^\d,]/g, "");
+
+  // Substitui vírgula por ponto para usar como número float
+  valorNumerico = valorNumerico.replace(",", ".");
+
+  // Converte para float
+  const numero = parseFloat(valorNumerico);
+
+  // Se não for número, retorna vazio
+  if (isNaN(numero)) return "";
+
+  // Formata como moeda brasileira
+  return numero.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+}
+
     
              
   useEffect(() => {
@@ -291,10 +313,10 @@ function formatarParaReaisInput(valor) {
     return () => unsubscribe?.();
   }, []);
 
-  useEffect(() => {
+    useEffect(() => {
     const unsubscribe = buscarPorTipo("Receita", (dados) => {
       // aqui você pode setar no estado, por exemplo
-      // setDespesaDash(dados);
+      setDespesaDash(dados);
 
       var listaR = []
       dados.forEach(e => {
@@ -303,11 +325,14 @@ function formatarParaReaisInput(valor) {
       setListaReceita(listaR);
 
       console.log("Aqui dados", dados)
-      console.log("Aqui é a lista Receita: ", listaReceita)
+      console.log("Aqui é a lista despesa: ", listaReceita)
     });
+
 
     return () => unsubscribe?.();
   }, []);
+
+
 
   useEffect(() => {
     async function fetchValor() {
@@ -659,8 +684,8 @@ function formatarParaReaisInput(valor) {
 
 
         <Dialog open={isOpenEdit} onClose={() => setIsOpenEdit(false)}>
-          <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
-            <DialogPanel className="max-w-lg space-y-4 rounded-lg border bg-white p-5">
+          <div className="fixed inset-0 flex w-screen items-center justify-center p-4 ">
+            <DialogPanel className=" max-w-lg space-y-4 rounded-lg bg-white p-5 shadow-xl">
               <DialogTitle className="font-bold">Editar registro</DialogTitle>
               <form
                 className="flex flex-col"
@@ -678,21 +703,17 @@ function formatarParaReaisInput(valor) {
                 />
 
                 <label htmlFor="">Valor</label>
+                <span>
+                <label htmlFor="">R$</label>
                 <input
-                  id="valor"
-                  type="number"
-                  value={(e) => {
-                    buscarPropriedadePorId(editarItem.id, "valor");
-                    valor
-                    
-                  }}
+                  type="text"
+                  value={dadosEdit.valor}
                   onChange={(e) => {
-                    handleChange;
-                    setDadosEdit({ ...dadosEdit, valor: resultado });
-                    
-                  }}
-                  required
+                    let valorFormatado = formatarParaReaisInput(e.target.value)
+                    setDadosEdit({ ...dadosEdit, valor: valorFormatado });                  }}
                 />
+
+                </span>
 
                 <label htmlFor="">Categoria</label>
                 <select
@@ -746,7 +767,7 @@ function formatarParaReaisInput(valor) {
 
         <Dialog open={isOpenSave} onClose={() => setIsOpenSave(false)}>
           <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
-            <DialogPanel className="max-w-lg space-y-4 border rounded-lg bg-white p-5">
+            <DialogPanel className="max-w-lg space-y-4 border rounded-lg bg-white p-5 shadow-xl">
               <DialogTitle className="font-bold">Adicionar registro</DialogTitle>
               <form className="flex flex-col" onSubmit={(e) => salvarDados(e)}>
                 <label htmlFor="">Descrição</label>
@@ -803,8 +824,8 @@ function formatarParaReaisInput(valor) {
                 </select>
 
                 <div>
-                  <button onClick={() => closeModalSave()}>Cancelar</button>
-                  <button type="submit">Salvar</button>
+                  <button className="bg-red-600 text-white" onClick={() => closeModalSave()}>Cancelar</button>
+                  <button className="bg-green-600 text-white" type="submit">Salvar</button>
                 </div>
               </form>
             </DialogPanel>

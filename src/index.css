@@ -7,7 +7,7 @@
     @apply text-[clamp(0.90rem,1vw,2rem)]
   }
   button {
-    @apply rounded-lg px-4 m-4 border-2 cursor-pointer;
+    @apply rounded-lg p-1 px-4 m-4 shadow-lg cursor-pointer;
   }
   input {
     @apply border-2;
