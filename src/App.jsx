@@ -4,6 +4,7 @@ import {
   collection,
   addDoc,
   getDocs,
+  getDoc,
   query,
   where,
   onSnapshot,
@@ -189,7 +190,25 @@ async function buscarDespesa() {
 
   const [valor, setValor] = useState("");
 
-function handleChange(e) {
+async function buscarPropriedadePorId(id, propriedade) {
+  try {
+    const ref = doc(db, "suaColecao", id); // troque "suaColecao" pelo nome da sua coleção
+    const docSnap = await getDoc(ref);
+
+    if (docSnap.exists()) {
+      const dados = docSnap.data();
+      setValor(dados) // retorna só a propriedade desejada
+    } else {
+      console.log("Documento não encontrado.");
+      return 0;
+    }
+  } catch (erro) {
+    console.error("Erro ao buscar documento:", erro);
+    return null;
+  }
+}
+
+  function handleChange(e) {
   const valorDigitado = e.target.value;
   const valorFormatado = formatarParaReaisInput(valorDigitado);
   setValor(valorFormatado);
@@ -289,6 +308,15 @@ function formatarParaReaisInput(valor) {
 
     return () => unsubscribe?.();
   }, []);
+
+  useEffect(() => {
+    async function fetchValor() {
+      const resultado = await buscarPropriedadePorId(editarItem.id, "valor");
+      setValor(resultado); // atualiza o estado com o valor do Firestore
+    }
+
+    if (editarItem?.id) fetchValor();
+  }, [editarItem.id]);
 
   useEffect(() => {
     const D = CalcularDespesa(listaDespesa)
@@ -526,42 +554,41 @@ function formatarParaReaisInput(valor) {
 
         </section>
 
-        <section id="busca" className='flex flex-row justify-around items-center'>
-          <div id="filtros-busca" className={`flex flex-col items-center`}>
+        <section id="busca" className='flex flex-row justify-around items-start w-[90%] mb-6'>
+          <div id="filtros-busca" className={`flex flex-row max-w-[300px] w-full items-start justify-between`}>
 
-            <div className='flex items-center'> 
+            {/* <div className='flex items-start'>  */}
 
-              <Disclosure>
-                <span className='flex flex-col justify-center items-center'>
-                <DisclosureButton>
-                  <button className='g-transparent border-none outline-none p-0 m-0 shadow-none' onClick={(e) => setFiltros(!filtros)}>Filtros seta</button>
+              <Disclosure as="div" className={"flex flex-col"}>
+                {/* <span className='flex flex-col justify-center items-center'> */}
+                <DisclosureButton className=' g-transparent border-none outline-none shadow-none' onClick={(e) => setFiltros(!filtros)}>
+                  Filtros
                 </DisclosureButton>
 
-                <DisclosurePanel>
-                <div className={`flex flex-row items-center`}>
+                <DisclosurePanel className={`flex flex-row items-center`}>
+                {/* <div className={`flex flex-row items-center`}> */}
                   <select name="" id="" onChange={(e)=> identificarTipo(e)}>
                     <option className="" selected value=" ">------</option>
                     <option className="" value="Receita">Receitas</option>
                     <option className="" value="Despesa">Despesas</option>
                   </select>
-                </div>
+                {/* </div> */}
 
                 </DisclosurePanel>
-                </span>
+                {/* </span> */}
               </Disclosure>
 
-              <span id="barra-busca">
-                <input type="text"/>
-              </span>
+ 
+              <input className="m-[14px]" type="text"/>
 
-            </div>
+            {/* </div> */}
 
 
           </div>
 
 
-          <span id="add">
-            <button onClick={() => OpenModalSave()} id="edit">
+          <span class="m-[14px]" id="add">
+            <button className="m-[0px]" onClick={() => OpenModalSave()} id="edit">
               Adicionar
           </button>
           </span>
@@ -633,8 +660,8 @@ function formatarParaReaisInput(valor) {
 
         <Dialog open={isOpenEdit} onClose={() => setIsOpenEdit(false)}>
           <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
-            <DialogPanel className="max-w-lg space-y-4 border bg-white p-12">
-              <DialogTitle className="font-bold">{ItemRef.periodo}</DialogTitle>
+            <DialogPanel className="max-w-lg space-y-4 rounded-lg border bg-white p-5">
+              <DialogTitle className="font-bold">Editar registro</DialogTitle>
               <form
                 className="flex flex-col"
                 onSubmit={(e) => editarItem(e, ItemRef.id)}
@@ -654,11 +681,16 @@ function formatarParaReaisInput(valor) {
                 <input
                   id="valor"
                   type="number"
-                  value={dadosEdit.valor}
-                  onChange={(e) =>
-                    setDadosEdit({ ...dadosEdit, valor: e.target.value })
+                  value={(e) => {
+                    buscarPropriedadePorId(editarItem.id, "valor");
+                    valor
                     
-                  }
+                  }}
+                  onChange={(e) => {
+                    handleChange;
+                    setDadosEdit({ ...dadosEdit, valor: resultado });
+                    
+                  }}
                   required
                 />
 
@@ -714,8 +746,8 @@ function formatarParaReaisInput(valor) {
 
         <Dialog open={isOpenSave} onClose={() => setIsOpenSave(false)}>
           <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
-            <DialogPanel className="max-w-lg space-y-4 border bg-white p-12">
-              <DialogTitle className="font-bold"></DialogTitle>
+            <DialogPanel className="max-w-lg space-y-4 border rounded-lg bg-white p-5">
+              <DialogTitle className="font-bold">Adicionar registro</DialogTitle>
               <form className="flex flex-col" onSubmit={(e) => salvarDados(e)}>
                 <label htmlFor="">Descrição</label>
                 <input
