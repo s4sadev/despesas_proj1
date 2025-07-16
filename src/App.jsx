@@ -100,10 +100,10 @@ async function buscarDespesa() {
   function getTipoImg(tipo){
     switch (tipo) {
       case "Despesa":
-        return "src/assets/menos_card.png"
+        return "./public/menos_card.png"
       
       case "Receita":
-        return "src/assets/mais_card.png"
+        return "./public/mais_card.png"
 
       default:
         console.log("Tipo não identificado", tipo);
@@ -378,11 +378,11 @@ function formatarValor(valor) {
         console.log("Aqui é o tipo do doc ", dados.tipo)
         // let typecard = ""; // declara primeiro
         // if (dados.tipo === "Receita") {
-        //   typecard = "src/assets/mais_card.png"
+        //   typecard = "./public/mais_card.png"
         //   setTipoCard(typecard);
         // } else if (dados.tipo === "Despesa") {
         //   const olha= dados.tipo
-        //   typecard = "src/assets/menos_card.png"
+        //   typecard = "./public/menos_card.png"
         //   setTipoCard(typecard);
         // } else {
         //   const olha= dados.tipo
@@ -652,11 +652,11 @@ function formatarValor(valor) {
                     <span id="aside-card" className="flex flex-col max-w-[30px] justify-around max-h-[60px] min-w-[25px] min-h-[65px]">
                   
                       <button className="p-1 m-1  max-w-[25px] max-h-[25px] w-full h-full" onClick={() => removerItem(item.id)}>
-                        <img src="src/assets/trash.png" className="" alt="" />
+                        <img src="./public/trash.png" className="" alt="" />
                       </button>
 
                       <button className="p-1  m-1 max-w-[25px] max-h-[25px] w-full h-full" onClick={() => OpenModalEdit(item)} id="edit">
-                        <img src="src/assets/edit.png" alt="" />
+                        <img src="./public/edit.png" alt="" />
                       </button>
 
                     </span>                
