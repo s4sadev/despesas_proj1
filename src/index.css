@@ -7,20 +7,23 @@
     @apply text-[clamp(0.90rem,1vw,2rem)]
   }
   button {
-    @apply rounded-lg p-1 px-4 m-4 shadow-lg cursor-pointer;
+    @apply rounded-lg p-1 px-4 m-4  cursor-pointer;
   }
   input {
-    @apply border-2;
+    @apply border p-1 rounded-lg ;
   }
 
+  select {
+    @apply border p-1 rounded-lg ;
+  }
   label {
-    @apply text-left;
+    @apply text-left mt-2;
   }
   li{
     @apply bg-white;
   }
   #dash div{
-    @apply min-h-[50px] min-w-[100px] max-w-[190px] w-full font-bold border-2 text-lg h-full m-2 p-2 text-center;
+    @apply min-h-[50px] min-w-[100px] max-w-[190px] w-full rounded-lg font-bold border-2 text-lg h-full m-2 p-2 text-center;
   }
   #root{
     @apply flex flex-col gap-2;

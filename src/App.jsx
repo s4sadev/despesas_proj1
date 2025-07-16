@@ -23,7 +23,9 @@ import {
   DisclosurePanel ,
 } from '@headlessui/react';
 
+
 import { db } from '../firebasedb';
+import Swal from 'sweetalert2';
 
 function App() {
   const [isOpenEdit, setIsOpenEdit] = useState(false);
@@ -472,7 +474,14 @@ function formatarValor(valor) {
 
     addDoc(ref, dados).then((docRef) => {
       console.log('Documento salvo com ID:', docRef.id);
-      window.alert('Documento salvo!');
+      window.alert("Deu certo!")
+      Swal.fire({
+        position: "top-end",
+        icon: "success",
+        title: "Registro salvo com sucesso",
+        showConfirmButton: false,
+        timer: 1500
+      });
     });
 
     setIsOpenSave(false).catch((erro) => {
@@ -502,7 +511,13 @@ function formatarValor(valor) {
         tipo: dadosEdit.tipo,
       });
 
-      alert('Atualizado com sucesso!');
+      Swal.fire({
+        position: "top-end",
+        icon: "success",
+        title: "Registro atualizado com sucesso",
+        showConfirmButton: false,
+        timer: 1500
+      });
       buscarDados(); // recarrega a lista
       closeModalEdit(); // se tiver modal
     } catch (erro) {
@@ -513,6 +528,7 @@ function formatarValor(valor) {
 
   // DELETE
   async function removerItem(id) {
+    
     const confirmacao = window.confirm('Tem certeza que deseja remover?');
     if (!confirmacao) return;
 
@@ -546,8 +562,8 @@ function formatarValor(valor) {
   return (
     <>
       <header>
-        <nav className='p-3 rounded-lg bg-[#f6f6f6]'>
-          <img src="" alt="" />
+        <nav className='p-3 rounded-lg bg-[#f6f6f6] flex items-center'>
+          <img className="w-[50px] h-[50px]" src="/ico_padrao.png" alt="" />
           <h1 className="text-start text-3xl font-bold ">Minhas Despesas</h1>
         </nav>
       </header>
@@ -555,14 +571,14 @@ function formatarValor(valor) {
       <main>
         <section id="dash" className='flex gap-13 flex-row flex-wrap justify-center'>
 
-          <div className="card-dash bg-green-100" id="mais">
+          <div className="card-dash bg-green-100 border-green-200" id="mais">
             <h1 className="text-start m-2">Receitas</h1>
             <p className='text-lg m-2'>
               {formatarParaReais(CalcularReceita(listaReceita))}
             </p>
           </div>
 
-          <div className="card-dash bg-red-100" id="menos">
+          <div className="card-dash bg-red-100 border-red-200" id="menos">
             <h1 className="text-start m-2">Depesas</h1>
             <p className='text-lg m-2'>
               {formatarParaReais( CalcularDespesa(listaDespesa))}
@@ -586,9 +602,9 @@ function formatarValor(valor) {
 
               <Disclosure as="div" className={"flex flex-col"}>
                 {/* <span className='flex flex-col justify-center items-center'> */}
-                <DisclosureButton className=' g-transparent border-none outline-none shadow-none' onClick={(e) => setFiltros(!filtros)}>
-                  Filtros
-                </DisclosureButton>
+                <DisclosureButton className='flex flex-row pl-[0px] ml-[0px] justify-center items-center gap-2 g-transparent border-none outline-none shadow-none' onClick={(e) => setFiltros(!filtros)}>
+                  <p>Filtros</p>
+                  <svg className="w-[20px] h-[12px]" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 16-4 4-4-4"></path><path d="M17 20V4"></path><path d="m3 8 4-4 4 4"></path><path d="M7 4v16"></path></svg>                </DisclosureButton>
 
                 <DisclosurePanel className={`flex flex-row items-center`}>
                 {/* <div className={`flex flex-row items-center`}> */}
@@ -704,8 +720,9 @@ function formatarValor(valor) {
 
                 <label htmlFor="">Valor</label>
                 <span>
-                <label htmlFor="">R$</label>
+                <label className="mr-1" htmlFor="">R$</label>
                 <input
+                  className="w-[150px]"
                   type="text"
                   value={dadosEdit.valor}
                   onChange={(e) => {
