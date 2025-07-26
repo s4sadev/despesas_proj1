@@ -23,4 +23,7 @@
 ![alt text](image-6.png)
 
 
+![alt text](image-7.png)
+De um olhadinha aqui para verificar se a sua commit aparece, aqui constam todas as commits salvas
+
 #qualquer duvida é so chamar no zaps :))
