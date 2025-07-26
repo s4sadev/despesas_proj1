@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Agora não precisa de @reference */
+
 @layer base {
   *{
     @apply text-[clamp(0.90rem,1vw,2rem)]

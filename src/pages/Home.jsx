@@ -1,4 +1,9 @@
 import React from "react";
+import trash from '../assets/trash.png' 
+import edit from '../assets/edit.png'
+import receita_ico from '../assets/mais_card.png'
+import despesa_ico from '../assets/menos_card.png'
+import padrao from '../assets/ico_padrao.png'
 import { useEffect, useState } from 'react';
 import '../App';
 import {
@@ -103,10 +108,10 @@ async function buscarDespesa() {
   function getTipoImg(tipo){
     switch (tipo) {
       case "Despesa":
-        return "public/assets/menos_card.png"
+        return despesa_ico;
       
       case "Receita":
-        return "public/assets/mais_card.png"
+        return receita_ico;
 
       default:
         console.log("Tipo não identificado", tipo);
@@ -564,8 +569,8 @@ function formatarValor(valor) {
     <>
       <header>
         <nav className='p-3 rounded-lg bg-[#f6f6f6] flex items-center'>
-          <img className="w-[50px] h-[50px]" src="public/assets/ico_padrao.png" alt="" />
-          <h1 className="text-start text-3xl font-bold ">Minhas Despesas</h1>
+          <img className="w-[50px] h-[50px]" src={padrao} alt="" />
+          <h1 className="text-start text-3xl font-bold">Minhas Despesas</h1>
         </nav>
       </header>
 
@@ -669,11 +674,11 @@ function formatarValor(valor) {
                     <span id="aside-card" className="flex flex-col max-w-[30px] justify-around max-h-[60px] min-w-[25px] min-h-[65px]">
                   
                       <button className="p-1 m-1  max-w-[25px] max-h-[25px] w-full h-full" onClick={() => removerItem(item.id)}>
-                        <img src="public/assets/trash.png" className="" alt="" />
+                        <img src={trash} className="" alt="" />
                       </button>
 
                       <button className="p-1  m-1 max-w-[25px] max-h-[25px] w-full h-full" onClick={() => OpenModalEdit(item)} id="edit">
-                        <img src="public/assets/edit.png" alt="" />
+                        <img src={edit} alt="" />
                       </button>
 
                     </span>                
