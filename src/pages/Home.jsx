@@ -1,6 +1,6 @@
 import React from "react";
 import { useEffect, useState } from 'react';
-import './App.css';
+import '../App';
 import {
   collection,
   addDoc,
@@ -13,7 +13,7 @@ import {
   deleteDoc,
   updateDoc,
 } from 'firebase/firestore'; //aqui podemos exportar as funções necessaria do CRUD
-import './index.css'; // ou './main.css'
+import '../index.css'; // ou './main.css'
 import {
   Dialog,
   DialogTitle,
@@ -25,7 +25,7 @@ import {
 } from '@headlessui/react';
 
 
-import { db } from '../firebasedb';
+import { db } from '../firebase/firebasedb';
 import Swal from 'sweetalert2';
 
 export function Home() {
@@ -103,10 +103,10 @@ async function buscarDespesa() {
   function getTipoImg(tipo){
     switch (tipo) {
       case "Despesa":
-        return "/menos_card.png"
+        return "public/assets/menos_card.png"
       
       case "Receita":
-        return "/mais_card.png"
+        return "public/assets/mais_card.png"
 
       default:
         console.log("Tipo não identificado", tipo);
@@ -564,7 +564,7 @@ function formatarValor(valor) {
     <>
       <header>
         <nav className='p-3 rounded-lg bg-[#f6f6f6] flex items-center'>
-          <img className="w-[50px] h-[50px]" src="/ico_padrao.png" alt="" />
+          <img className="w-[50px] h-[50px]" src="public/assets/ico_padrao.png" alt="" />
           <h1 className="text-start text-3xl font-bold ">Minhas Despesas</h1>
         </nav>
       </header>
@@ -669,11 +669,11 @@ function formatarValor(valor) {
                     <span id="aside-card" className="flex flex-col max-w-[30px] justify-around max-h-[60px] min-w-[25px] min-h-[65px]">
                   
                       <button className="p-1 m-1  max-w-[25px] max-h-[25px] w-full h-full" onClick={() => removerItem(item.id)}>
-                        <img src="/trash.png" className="" alt="" />
+                        <img src="public/assets/trash.png" className="" alt="" />
                       </button>
 
                       <button className="p-1  m-1 max-w-[25px] max-h-[25px] w-full h-full" onClick={() => OpenModalEdit(item)} id="edit">
-                        <img src="/edit.png" alt="" />
+                        <img src="public/assets/edit.png" alt="" />
                       </button>
 
                     </span>                

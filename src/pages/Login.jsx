@@ -12,8 +12,8 @@ export default function Login(){
                 <input type="text" />
 
                 <span class="flex ">
-                    <button>Me cadastrar</button>
-                    <button onclick=''>Acessar</button>
+                    <button><Link to="/cadastro">Me cadastrar</Link></button>
+                    <button><Link to="/home">Acessar</Link></button>
                 </span>
             </form>
         </div>
