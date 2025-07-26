@@ -12,8 +12,9 @@ export default function Login(){
                 <input type="text" />
 
                 <span class="flex ">
-                    <button><Link to="/cadastro">Me cadastrar</Link></button>
-                    <button><Link to="/home">Acessar</Link></button>
+
+                    <Link to="/cadastro"><button>Me cadastrar</button></Link>
+                    <Link to="/home"> <button>Acessar</button></Link>
                 </span>
             </form>
         </div>
