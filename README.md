@@ -1,12 +1,26 @@
-# React + Vite
+# Dicas para usar o vscode studio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+- Para abrir o projeto basta ir no terminal (ctrl + shift + c) > selecione "continue trabalhando no github Codespaces" > caso apareça para voces escolherem entre 16 ou 8 de ram, pode selecionar o de 16. Agora o editor já vai estar pronto
 
-Currently, two official plugins are available:
+- Para rodar o projeto é só abrir o terminal (ctrl + shift + c) e digitar: "npm install && npm run dev"
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Por favor, na hora de fazer o commit não comitem no branch principal, para comitar basta ir em controle do codigo fonte > escrever o titulo do commit > commit e push > (caso apareça uma setinha de girar, confome a ultima *imagem do passo a passo para comitar*, PODE CLICAR). E pronto, já vai ter salvo as alterações no proprio branch de voces
 
-## Expanding the ESLint configuration
+# Como abrir o projeto
+![alt text](image-4.png)
+![alt text](image-6.png)
+![alt text](image-3.png)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+# Como rodar o projeto
+![alt text](image-8.png)
+
+# Passo a passo para commitar: 
+
+![alt text](image-1.png)
+
+![alt text](image-2.png)
+
+![alt text](image-9.png)
+
+
+#qualquer duvida é so chamar no zaps :))
