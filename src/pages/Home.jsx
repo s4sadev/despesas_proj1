@@ -268,7 +268,29 @@ function formatarValor(valor) {
     console.log('[DEBUG] Retorno de buscarDados():', unsubscribe);
     console.log('[DEBUG] Tipo do retorno:', typeof unsubscribe);
 
+
+function aplicarFiltros(lista) {
+  return lista.filter(item => {
+    const nomeOk = filtroNome === "" || (item.descricao || "").toLowerCase().includes(filtroNome.toLowerCase());
+    const categoriaOk = filtroCategoria === "" || (item.categoria || "").toLowerCase().includes(filtroCategoria.toLowerCase());
+    const valorOk = filtroValor === "" || parseFloat(item.valor) === parseFloat(filtroValor);
+    const periodoOk =
+      (filtroPeriodo.inicio === "" || new Date(item.periodo) >= new Date(filtroPeriodo.inicio)) &&
+      (filtroPeriodo.fim === "" || new Date(item.periodo) <= new Date(filtroPeriodo.fim));
+    return nomeOk && categoriaOk && valorOk && periodoOk;
+  });
+}
+
     return () => {
+
+<div className="filtros flex flex-wrap gap-2 p-2">
+  <input type="text" placeholder="Filtrar por nome" value={filtroNome} onChange={e => setFiltroNome(e.target.value)} className="border p-1 rounded" />
+  <input type="text" placeholder="Filtrar por categoria" value={filtroCategoria} onChange={e => setFiltroCategoria(e.target.value)} className="border p-1 rounded" />
+  <input type="number" placeholder="Filtrar por valor" value={filtroValor} onChange={e => setFiltroValor(e.target.value)} className="border p-1 rounded" />
+  <input type="date" value={filtroPeriodo.inicio} onChange={e => setFiltroPeriodo({ ...filtroPeriodo, inicio: e.target.value })} className="border p-1 rounded" />
+  <input type="date" value={filtroPeriodo.fim} onChange={e => setFiltroPeriodo({ ...filtroPeriodo, fim: e.target.value })} className="border p-1 rounded" />
+</div>
+
       console.log('[DEBUG] Executando cleanup...');
       if (unsubscribe && typeof unsubscribe === 'function') {
         unsubscribe();
@@ -281,6 +303,10 @@ function formatarValor(valor) {
 
 
   const [tipoFiltroLista, setTipoFiltroLista]= useState([])
+  const [filtroNome, setFiltroNome] = useState("");
+  const [filtroCategoria, setFiltroCategoria] = useState("");
+  const [filtroValor, setFiltroValor] = useState("");
+  const [filtroPeriodo, setFiltroPeriodo] = useState({ inicio: "", fim: "" });
 
   useEffect(() => {
     const unsubscribe = buscarPorTipo(tipoFiltro, (dados) => {
