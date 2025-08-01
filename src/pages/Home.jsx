@@ -308,6 +308,19 @@ function aplicarFiltros(lista) {
   const [filtroValor, setFiltroValor] = useState("");
   const [filtroPeriodo, setFiltroPeriodo] = useState({ inicio: "", fim: "" });
 
+  function aplicarFiltros(lista) {
+  return lista.filter(item => {
+    const nomeOk = filtroNome === "" || (item.descricao || "").toLowerCase().includes(filtroNome.toLowerCase());
+    const categoriaOk = filtroCategoria === "" || (item.categoria || "").toLowerCase().includes(filtroCategoria.toLowerCase());
+    const valorOk = filtroValor === "" || parseFloat(item.valor) === parseFloat(filtroValor);
+    const periodoOk =
+      (filtroPeriodo.inicio === "" || new Date(item.periodo) >= new Date(filtroPeriodo.inicio)) &&
+      (filtroPeriodo.fim === "" || new Date(item.periodo) <= new Date(filtroPeriodo.fim));
+    return nomeOk && categoriaOk && valorOk && periodoOk;
+  });
+}
+
+
   useEffect(() => {
     const unsubscribe = buscarPorTipo(tipoFiltro, (dados) => {
       // aqui você pode setar no estado, por exemplo
@@ -652,7 +665,13 @@ function aplicarFiltros(lista) {
               </Disclosure>
 
  
-              <input className="m-[14px]" type="text"/>
+              <input
+  className="m-[14px] border p-1 rounded"
+  type="text"
+  placeholder="Buscar por nome"
+  value={filtroNome}
+  onChange={(e) => setFiltroNome(e.target.value)}
+/>
 
             {/* </div> */}
 
@@ -671,7 +690,7 @@ function aplicarFiltros(lista) {
 
         <section id="dados" className='p-4 rounded-lg bg-[#f6f6f6]' flex justify-between>
           <ul className="list-none gap-4 flex flex-wrap items-start justify-center">
-            {listaDados.map((item, index) => (
+            {aplicarFiltros(listaDados).map((item, index) => (
               <li
                 className="list-none rounded-lg border-2 flex flex-row justify-center max-w-[250px] max-h-[350px] w-full h-auto min-w-[195px] min-h-[90px]"
                 key={item.id}
