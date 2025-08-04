@@ -12,8 +12,6 @@ createRoot(document.getElementById('root')).render(
   </StrictMode>,
 )
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-
 // Registra o service worker
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/service-worker.js')
