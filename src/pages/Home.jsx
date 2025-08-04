@@ -1,4 +1,4 @@
-import React from "react";
+import React, { use } from "react";
 import trash from '../assets/trash.png' 
 import edit from '../assets/edit.png'
 import receita_ico from '../assets/mais_card.png'
@@ -33,7 +33,10 @@ import {
 import { db } from '../firebase/firebasedb';
 import Swal from 'sweetalert2';
 
+
+
 export function Home() {
+
   const [isOpenEdit, setIsOpenEdit] = useState(false);
   const [isOpenSave, setIsOpenSave] = useState(false);
   // const [tipoCard, setTipoCard] = useState("");
