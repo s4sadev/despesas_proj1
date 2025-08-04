@@ -9,8 +9,13 @@ import {
   signInWithPopup
 } from "firebase/auth";
 
+import { useNavigate } from 'react-router-dom';
+
 
 export default function PageCadastro(){
+    const provider = new GoogleAuthProvider();
+    const navigate = useNavigate();
+
     function EnviarDados(e){
         e.preventDefault();
 
@@ -31,10 +36,23 @@ export default function PageCadastro(){
             window.alert("Erro ao criar usuario", erro.message)
         })  
     }
+
+    function AtivarPopUp(){
+        signInWithPopup(auth, provider)
+        .then((result)=> {
+            console.log("Usuario autenticado com o google", result.user)
+            navigate('/home')
+        })
+        .catch((error) => {
+            console.error("Erro ao autenticar com Google: ", error.message, error.code)
+        })
+    }
+
+    
     return (
         <div>
             <span class="flex w-[100%] justify-end">
-                <button class="flex  border-2">Cadastre-se com o Google</button>
+                <button class="flex  border-2" onClick={AtivarPopUp}>Cadastre-se com o Google</button>
             </span>
 
 
