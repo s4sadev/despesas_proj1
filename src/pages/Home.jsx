@@ -33,9 +33,14 @@ import {
 import { db } from '../firebase/firebasedb';
 import Swal from 'sweetalert2';
 
+import { onAuthStateChanged } from "firebase/auth";
+import { getAuth } from "firebase/auth";
+
 
 
 export function Home() {
+  const auth = getAuth(); // obtém a instância atual
+
 
   const [isOpenEdit, setIsOpenEdit] = useState(false);
   const [isOpenSave, setIsOpenSave] = useState(false);
@@ -272,27 +277,27 @@ function formatarValor(valor) {
     console.log('[DEBUG] Tipo do retorno:', typeof unsubscribe);
 
 
-function aplicarFiltros(lista) {
-  return lista.filter(item => {
-    const nomeOk = filtroNome === "" || (item.descricao || "").toLowerCase().includes(filtroNome.toLowerCase());
-    const categoriaOk = filtroCategoria === "" || (item.categoria || "").toLowerCase().includes(filtroCategoria.toLowerCase());
-    const valorOk = filtroValor === "" || parseFloat(item.valor) === parseFloat(filtroValor);
-    const periodoOk =
-      (filtroPeriodo.inicio === "" || new Date(item.periodo) >= new Date(filtroPeriodo.inicio)) &&
-      (filtroPeriodo.fim === "" || new Date(item.periodo) <= new Date(filtroPeriodo.fim));
-    return nomeOk && categoriaOk && valorOk && periodoOk;
-  });
-}
+    // function aplicarFiltros(lista) {
+    //   return lista.filter(item => {
+    //     const nomeOk = filtroNome === "" || (item.descricao || "").toLowerCase().includes(filtroNome.toLowerCase());
+    //     const categoriaOk = filtroCategoria === "" || (item.categoria || "").toLowerCase().includes(filtroCategoria.toLowerCase());
+    //     const valorOk = filtroValor === "" || parseFloat(item.valor) === parseFloat(filtroValor);
+    //     const periodoOk =
+    //       (filtroPeriodo.inicio === "" || new Date(item.periodo) >= new Date(filtroPeriodo.inicio)) &&
+    //       (filtroPeriodo.fim === "" || new Date(item.periodo) <= new Date(filtroPeriodo.fim));
+    //     return nomeOk && categoriaOk && valorOk && periodoOk;
+    //   });
+    // }
 
     return () => {
 
-<div className="filtros flex flex-wrap gap-2 p-2">
-  <input type="text" placeholder="Filtrar por nome" value={filtroNome} onChange={e => setFiltroNome(e.target.value)} className="border p-1 rounded" />
-  <input type="text" placeholder="Filtrar por categoria" value={filtroCategoria} onChange={e => setFiltroCategoria(e.target.value)} className="border p-1 rounded" />
-  <input type="number" placeholder="Filtrar por valor" value={filtroValor} onChange={e => setFiltroValor(e.target.value)} className="border p-1 rounded" />
-  <input type="date" value={filtroPeriodo.inicio} onChange={e => setFiltroPeriodo({ ...filtroPeriodo, inicio: e.target.value })} className="border p-1 rounded" />
-  <input type="date" value={filtroPeriodo.fim} onChange={e => setFiltroPeriodo({ ...filtroPeriodo, fim: e.target.value })} className="border p-1 rounded" />
-</div>
+    // <div className="filtros flex flex-wrap gap-2 p-2">
+    //   <input type="text" placeholder="Filtrar por nome" value={filtroNome} onChange={e => setFiltroNome(e.target.value)} className="border p-1 rounded" />
+    //   <input type="text" placeholder="Filtrar por categoria" value={filtroCategoria} onChange={e => setFiltroCategoria(e.target.value)} className="border p-1 rounded" />
+    //   <input type="number" placeholder="Filtrar por valor" value={filtroValor} onChange={e => setFiltroValor(e.target.value)} className="border p-1 rounded" />
+    //   <input type="date" value={filtroPeriodo.inicio} onChange={e => setFiltroPeriodo({ ...filtroPeriodo, inicio: e.target.value })} className="border p-1 rounded" />
+    //   <input type="date" value={filtroPeriodo.fim} onChange={e => setFiltroPeriodo({ ...filtroPeriodo, fim: e.target.value })} className="border p-1 rounded" />
+    // </div>
 
       console.log('[DEBUG] Executando cleanup...');
       if (unsubscribe && typeof unsubscribe === 'function') {
@@ -322,10 +327,43 @@ function aplicarFiltros(lista) {
     return nomeOk && categoriaOk && valorOk && periodoOk;
   });
 }
+  const [uid, setUid] = useState(null);
+    const [carregando, setCarregando] = useState(true);
+
+
+useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUid(user.uid);
+        console.log("✅ UID carregado:", user.uid);
+      } else {
+        console.warn("Usuário não logado");
+      }
+      setCarregando(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    let unsubscribe;
+
+    if (uid) {
+      console.log("[DEBUG] Chamando buscarDados()...");
+      buscarDados(uid).then((unsub) => {
+        unsubscribe = unsub;
+      });
+    }
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+      else console.log("[DEBUG] Nada para limpar - unsubscribe não é função");
+    };
+  }, [uid]);
 
 
   useEffect(() => {
-    const unsubscribe = buscarPorTipo(tipoFiltro, (dados) => {
+    const unsubscribe = buscarPorTipo(uid, tipoFiltro, (dados) => {
       // aqui você pode setar no estado, por exemplo
       var listaX = []
       dados.forEach(e => {
@@ -345,7 +383,7 @@ function aplicarFiltros(lista) {
 
 
   useEffect(() => {
-    const unsubscribe = buscarPorTipo("Despesa", (dados) => {
+    const unsubscribe = buscarPorTipo(uid, "Despesa", (dados) => {
       // aqui você pode setar no estado, por exemplo
       setDespesaDash(dados);
 
@@ -364,7 +402,8 @@ function aplicarFiltros(lista) {
   }, []);
 
     useEffect(() => {
-    const unsubscribe = buscarPorTipo("Receita", (dados) => {
+    const unsubscribe = buscarPorTipo(uid, 
+      "Receita", (dados) => {
       // aqui você pode setar no estado, por exemplo
       setDespesaDash(dados);
 
@@ -407,58 +446,36 @@ function aplicarFiltros(lista) {
 
 
   // READ - LER
-  async function buscarDados() {
-    const unsubscribe = onSnapshot(ref, (querySnapshot) => {
-      // DEBUG 1: Verifica se está recebendo algo
-      console.log('🚨 querySnapshot recebida:', querySnapshot);
+async function buscarDados() {
+  if (!uid) {
+    console.warn("UID ainda não disponível.");
+    return;
+  }
 
-      // DEBUG 2: Inspeciona cada documento bruto
-      querySnapshot.docs.forEach((doc, index) => {
-        console.log(`📄 Documento ${index + 1}:`, {
-          id: doc.id,
-          dadosBrutos: doc.data(),
-          timestampBruto: doc.data().periodo, // Verifica o campo específico
-        });
-      });
+  const ref = collection(db, "despesas"); // ou o nome correto
+  const filtro = query(ref, where("uid", "==", uid));
 
-      // Processamento normal
-      const novosDados = querySnapshot.docs.map((doc) => {
-        const dados = doc.data();
+  const unsubscribe = onSnapshot(filtro, (querySnapshot) => {
+    console.log('🚨 querySnapshot recebida:', querySnapshot);
 
-        console.log("Aqui é o tipo do doc ", dados.tipo)
-        // let typecard = ""; // declara primeiro
-        // if (dados.tipo === "Receita") {
-        //   typecard = "./public/mais_card.png"
-        //   setTipoCard(typecard);
-        // } else if (dados.tipo === "Despesa") {
-        //   const olha= dados.tipo
-        //   typecard = "./public/menos_card.png"
-        //   setTipoCard(typecard);
-        // } else {
-        //   const olha= dados.tipo
-        //   typecard = olha44
-        //   setTipoCard(typecard);
-        // }
+    const novosDados = querySnapshot.docs.map((doc) => {
+      const dados = doc.data();
+      console.log("Tipo:", dados.tipo);
 
-
-        return {
-          id: doc.id,
-          ...dados,
-          periodo: dados.periodo ? converterTimestamp(dados.periodo) : null,
-        };
-        
-
-      });
-
-      // DEBUG 3: Verifica o resultado final
-      console.log('✅ Dados processados:', novosDados);
-      setListaDados(novosDados);
-
-
+      return {
+        id: doc.id,
+        ...dados,
+        periodo: dados.periodo ? converterTimestamp(dados.periodo) : null,
+      };
     });
 
-    return unsubscribe;
-  }
+    console.log('✅ Dados processados:', novosDados);
+    setListaDados(novosDados);
+  });
+
+  return unsubscribe;
+}
+
 
   function converterTimestamp(dadoBruto) {
     if (dadoBruto && typeof dadoBruto.seconds === 'number') {
@@ -472,28 +489,34 @@ function aplicarFiltros(lista) {
     }
   }
 
- function buscarPorTipo(tipoDesejado, callback) {
-    
-  var filtro = query(ref, where("tipo", "==", tipoDesejado));
-    
-  if(tipoDesejado == " "){
-      filtro = ref;
-      console.log(filtro)
-    }
+function buscarPorTipo(uid, tipoDesejado, callback) {
+  if (!uid) {
+    console.warn("UID não fornecido");
+    return;
+  }
+
+  const baseRef = ref; // assume que ref já é sua referência à coleção
+
+  // Verifica se tipo foi passado corretamente (string não vazia)
+  const filtro =
+    tipoDesejado && tipoDesejado.trim() !== ""
+      ? query(baseRef, where("tipo", "==", tipoDesejado), where("uid", "==", uid))
+      : query(baseRef, where("uid", "==", uid)); // sem filtro de tipo
 
   const unsubscribe = onSnapshot(filtro, (querySnapshot) => {
     const dadosFiltrados = querySnapshot.docs.map((doc) => ({
       id: doc.id,
-      ...doc.data()
+      ...doc.data(),
     }));
 
-    
-    console.log(`[DEBUG] Documentos do tipo "${tipoDesejado}":`, dadosFiltrados);
+    console.log(`[DEBUG] Documentos do tipo "${tipoDesejado || "todos"}":`, dadosFiltrados);
+
     if (callback) callback(dadosFiltrados);
   });
 
   return unsubscribe;
 }
+
 
   // CREATE - SALVAR
   function salvarDados(e) {
@@ -513,6 +536,7 @@ function aplicarFiltros(lista) {
     const periodoIn = e.target.periodoSave.value;
     const tipoIn = e.target.tipoSave.value;
     const dados = {
+      uid: uid,
       descricao: descricaoIn,
       valor: valorIn,
       categoria: categoriaIn,
@@ -642,7 +666,7 @@ function aplicarFiltros(lista) {
           </div>
 
         </section>
-
+        
         <section id="busca" className='flex flex-row justify-around items-start w-[90%] mb-6'>
           <div id="filtros-busca" className={`flex flex-row max-w-[300px] w-full items-start justify-between`}>
 
@@ -691,60 +715,71 @@ function aplicarFiltros(lista) {
 
         </section>
 
-        <section id="dados" className='p-4 rounded-lg bg-[#f6f6f6]' flex justify-between>
-          <ul className="list-none gap-4 flex flex-wrap items-start justify-center">
-            {aplicarFiltros(listaDados).map((item, index) => (
-              <li
-                className="list-none rounded-lg border-2 flex flex-row justify-center max-w-[250px] max-h-[350px] w-full h-auto min-w-[195px] min-h-[90px]"
-                key={item.id}
-                id={item.id}
-              >
+        {carregando ? (
+          <p>Carregando usuario</p>
+        ): uid ? (
+          <section id="dados" className='p-4 rounded-lg bg-[#f6f6f6]' flex justify-between>
+            <ul className="list-none gap-4 flex flex-wrap items-start justify-center">
+              {aplicarFiltros(listaDados).map((item, index) => (
+                <li
+                  className="list-none rounded-lg border-2 flex flex-row justify-center max-w-[250px] max-h-[350px] w-full h-auto min-w-[195px] min-h-[90px]"
+                  key={item.id}
+                  id={item.id}
+                >
 
-                <span id="main" className="flex flex-col justify-around m-2">
-                    <span id="body-card" className="min-w-[120px] flex flex-row gap-[3rem]">
-                    
-                      <span id="header">
-                        <span id="img-header" className='flex flex-row items-start gap-2'>
-                          <img
-                            className='max-w-[25px] max-h-[25px] w-full h-full'
-                            src={getTipoImg(item.tipo)}
-                            alt=""
-                          />
-                          <span id="info-header" className='text-start'>
-                            <p className="" id="descricao">{item.descricao}</p>
-                            <hr className="border-t w-[100px] border-gray-300  " />
-                            <p>{formatarParaReais(item.valor)}</p>
+                  <span id="main" className="flex flex-col justify-around m-2">
+                      <span id="body-card" className="min-w-[120px] flex flex-row gap-[3rem]">
+                      
+                        <span id="header">
+                          <span id="img-header" className='flex flex-row items-start gap-2'>
+                            <img
+                              className='max-w-[25px] max-h-[25px] w-full h-full'
+                              src={getTipoImg(item.tipo)}
+                              alt=""
+                            />
+                            <span id="info-header" className='text-start'>
+                              <p className="" id="descricao">{item.descricao}</p>
+                              <hr className="border-t w-[100px] border-gray-300  " />
+                              <p>{formatarParaReais(item.valor)}</p>
+                            </span>
                           </span>
+          
                         </span>
-        
-                      </span>
 
-                    <span id="aside-card" className="flex flex-col max-w-[30px] justify-around max-h-[60px] min-w-[25px] min-h-[65px]">
-                  
-                      <button className="p-1 m-1  max-w-[25px] max-h-[25px] w-full h-full" onClick={() => removerItem(item.id)}>
-                        <img src={trash} className="" alt="" />
-                      </button>
-
-                      <button className="p-1  m-1 max-w-[25px] max-h-[25px] w-full h-full" onClick={() => OpenModalEdit(item)} id="edit">
-                        <img src={edit} alt="" />
-                      </button>
-
-                    </span>                
+                      <span id="aside-card" className="flex flex-col max-w-[30px] justify-around max-h-[60px] min-w-[25px] min-h-[65px]">
                     
-                    </span>
-              
-                      <span id="footer-card" className='flex flex-row justify-around w-full max-h-[30px] h-full gap-1'>
-                        <p className={`max-h-[30px]  ${getCategoriaStyle(item.categoria)} border-2 p-1 rounded-lg`}>{item.categoria}</p>
-                        <p className='max-h-[50px] text-end pt-2 w-full'>{tratarPeriodo(item.periodo)}</p>
-                    
+                        <button className="p-1 m-1  max-w-[25px] max-h-[25px] w-full h-full" onClick={() => removerItem(item.id)}>
+                          <img src={trash} className="" alt="" />
+                        </button>
+
+                        <button className="p-1  m-1 max-w-[25px] max-h-[25px] w-full h-full" onClick={() => OpenModalEdit(item)} id="edit">
+                          <img src={edit} alt="" />
+                        </button>
+
+                      </span>                
+                      
                       </span>
-                </span>
+                
+                        <span id="footer-card" className='flex flex-row justify-around w-full max-h-[30px] h-full gap-1'>
+                          <p className={`max-h-[30px]  ${getCategoriaStyle(item.categoria)} border-2 p-1 rounded-lg`}>{item.categoria}</p>
+                          <p className='max-h-[50px] text-end pt-2 w-full'>{tratarPeriodo(item.periodo)}</p>
+                      
+                        </span>
+                  </span>
 
-              </li>
-            ))}
-          </ul>
+                </li>
+              ))}
+            </ul>
 
-        </section>
+          </section>          
+        ): (
+          <p>Nenhum usuario logado</p>
+        )}
+
+
+
+
+
       </main>
 
 
