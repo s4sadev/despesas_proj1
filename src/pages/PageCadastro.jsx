@@ -65,8 +65,8 @@ export default function PageCadastro(){
                 <input required type="text" name="senha" />
 
                 <span>
+                    <Link to="/"><button type="button">Voltar para o Login</button></Link>
                     <button type="submit">Criar conta</button>
-                    <Link to="/"><button>Voltar para o Login</button></Link>
                 </span>
 
             </form>

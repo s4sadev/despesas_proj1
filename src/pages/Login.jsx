@@ -87,9 +87,9 @@ export default function Login(){
                 <label htmlFor="">Senha</label>
                 <input type="text" className={` focus:outline-none   ${estiloInput ? "border-red-500" : "border-black"}`} id="senha-input" onChange={(e) => setValorDigitado(e.target.value)} required name='senha' />
                 <p  className={`text-left text-red-500 ${mostrarAlert ? "inline":"hidden"}`}>A quantidade minima de caracteres é 6</p>
+                
                 <span class="flex ">
-
-                    <Link to="/cadastro"><button>Me cadastrar</button></Link>
+                    <Link to="/cadastro"><button type="button">Me cadastrar</button></Link>
                     <button type='submit'>Acessar</button>
                 </span>
             </form>
