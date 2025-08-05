@@ -4,26 +4,69 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
- <!-- PWA Configuration -->
+    <!-- ========== PWA CONFIGURATION (CORRIGIDO) ========== -->
+    
+    <!-- Manifest -->
     <link rel="manifest" href="./manifest.json">
+    
+    <!-- Meta tags PWA -->
     <meta name="theme-color" content="#007bff">
     <meta name="background-color" content="#ffffff">
     
-    <!-- iOS Support -->
+    <!-- iOS Support (CAMINHOS CORRIGIDOS) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="MeuApp">
-    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <meta name="apple-mobile-web-app-title" content="Minhas Despesas">
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="./icons/icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="./icons/icon-512.png">
     
-    <!-- Windows Support -->
-    <meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+    <!-- Windows Support (CAMINHOS CORRIGIDOS) -->
+    <meta name="msapplication-TileImage" content="./icons/icon-192.png">
     <meta name="msapplication-TileColor" content="#007bff">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-192.png">
 
     <title>Minhas Despesas</title>
-
   </head>
   <body>
     <div id="root"></div>
+    
+    <!-- ========== PWA SERVICE WORKER ========== -->
+    <script>
+      // Registrar Service Worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then(registration => {
+              console.log('✅ Service Worker registrado:', registration.scope);
+            })
+            .catch(error => {
+              console.log('❌ Falha ao registrar Service Worker:', error);
+            });
+        });
+      }
+
+      // Prompt de instalação PWA
+      let deferredPrompt;
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        console.log('💡 PWA pode ser instalado');
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Você pode criar um botão de instalação no seu React se quiser
+        // Por enquanto, só logamos no console
+      });
+
+      // Detectar quando PWA foi instalado
+      window.addEventListener('appinstalled', () => {
+        console.log('🎉 PWA foi instalado!');
+      });
+    </script>
+    
+    <!-- ========== SEUS SCRIPTS ORIGINAIS ========== -->
     <script type="module" src="/src/main.jsx"></script>
     <script src="sweetalert2.all.min.js"></script>
   </body>
