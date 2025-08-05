@@ -6,7 +6,8 @@ const urlsToCache = [
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  // Adicione outros assets estáticos conforme necessário
+  // Assets do Vite (ajustar conforme necessário)
+  './assets/'
 ];
 
 // Instalar Service Worker
