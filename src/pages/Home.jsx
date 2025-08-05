@@ -667,16 +667,36 @@ function buscarPorTipo(uid, tipoDesejado, callback) {
 
         </section>
         
-        <section id="busca" className='flex flex-row justify-around items-start w-[90%] mb-6'>
-          <div id="filtros-busca" className={`flex flex-row max-w-[300px] w-full items-start justify-between`}>
+        <section id="busca" className='flex flex-col items-center justify-center'>
+          <div className="flex flex-row  w-[85%] mb-6 mt-6 justify-between">
+            
+            <div id="buscar" className="flex flex-row items-center">
+              <p className="mr-2">Buscar</p>
+              <span id="filtros-busca" className={`flex flex-row max-w-[300px] w-full items-start justify-between`}>
+                <input
+                  className="border p-1  min-w-[108px] max-w-[250px] w-full"
+                  type="text"
+                  placeholder="Buscar por nome"
+                  value={filtroNome}
+                  onChange={(e) => setFiltroNome(e.target.value)}
+                />
+              </span>
+            </div>
 
-            {/* <div className='flex items-start'>  */}
-
-              <Disclosure as="div" className={"flex flex-col"}>
+            <span className="m-[0px] min-w-[45px] max-w-[75px]" id="add">
+              <button className="m-[0px] w-full" onClick={() => OpenModalSave()} id="edit">
+                Adicionar
+              </button>
+            </span>
+          </div>
+          
+          <div className="flex flex-row  w-[85%] " >
+              <Disclosure as="div" className={"flex flex-col items-start"}>
                 {/* <span className='flex flex-col justify-center items-center'> */}
-                <DisclosureButton className='flex flex-row pl-[0px] ml-[0px] justify-center items-center gap-2 g-transparent border-none outline-none shadow-none' onClick={(e) => setFiltros(!filtros)}>
+                <DisclosureButton className='flex flex-row mt-[0px] ml-[1px] pl-[0px] justify-center items-center gap-2 g-transparent border-none outline-none shadow-none' onClick={(e) => setFiltros(!filtros)}>
                   <p>Filtros</p>
-                  <svg className="w-[20px] h-[12px]" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 16-4 4-4-4"></path><path d="M17 20V4"></path><path d="m3 8 4-4 4 4"></path><path d="M7 4v16"></path></svg>                </DisclosureButton>
+                  <svg className="w-[20px] h-[12px]" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 16-4 4-4-4"></path><path d="M17 20V4"></path><path d="m3 8 4-4 4 4"></path><path d="M7 4v16"></path></svg>
+                </DisclosureButton>
 
                 <DisclosurePanel className={`flex flex-row items-center`}>
                 {/* <div className={`flex flex-row items-center`}> */}
@@ -690,28 +710,7 @@ function buscarPorTipo(uid, tipoDesejado, callback) {
                 </DisclosurePanel>
                 {/* </span> */}
               </Disclosure>
-
- 
-              <input
-  className="m-[14px] border p-1 rounded"
-  type="text"
-  placeholder="Buscar por nome"
-  value={filtroNome}
-  onChange={(e) => setFiltroNome(e.target.value)}
-/>
-
-            {/* </div> */}
-
-
           </div>
-
-
-          <span class="m-[14px]" id="add">
-            <button className="m-[0px]" onClick={() => OpenModalSave()} id="edit">
-              Adicionar
-          </button>
-          </span>
-          
 
         </section>
 
