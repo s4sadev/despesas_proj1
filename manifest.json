@@ -1,5 +1,11 @@
 {
- "name": "App",
+ "name": "Minhas Despesas",
+ "short_name": "DespesasApp",
+ "description": "Um app criado para seu gerenciamento financeiro",
+ "start_url": "/",
+ "display": "standalone",
+ "backgroun_color": "#ffffff",
+ "theme_color": "#1e40af", 
  "icons": [
   {
    "src": "\/android-icon-36x36.png",
@@ -38,4 +44,5 @@
    "density": "4.0"
   }
  ]
+
 }

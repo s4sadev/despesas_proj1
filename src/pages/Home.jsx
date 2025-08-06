@@ -1,4 +1,4 @@
-import React from "react";
+import React, { use } from "react";
 import trash from '../assets/trash.png' 
 import edit from '../assets/edit.png'
 import receita_ico from '../assets/mais_card.png'
@@ -33,7 +33,10 @@ import {
 import { db } from '../firebase/firebasedb';
 import Swal from 'sweetalert2';
 
+
+
 export function Home() {
+
   const [isOpenEdit, setIsOpenEdit] = useState(false);
   const [isOpenSave, setIsOpenSave] = useState(false);
   // const [tipoCard, setTipoCard] = useState("");
@@ -268,7 +271,29 @@ function formatarValor(valor) {
     console.log('[DEBUG] Retorno de buscarDados():', unsubscribe);
     console.log('[DEBUG] Tipo do retorno:', typeof unsubscribe);
 
+
+function aplicarFiltros(lista) {
+  return lista.filter(item => {
+    const nomeOk = filtroNome === "" || (item.descricao || "").toLowerCase().includes(filtroNome.toLowerCase());
+    const categoriaOk = filtroCategoria === "" || (item.categoria || "").toLowerCase().includes(filtroCategoria.toLowerCase());
+    const valorOk = filtroValor === "" || parseFloat(item.valor) === parseFloat(filtroValor);
+    const periodoOk =
+      (filtroPeriodo.inicio === "" || new Date(item.periodo) >= new Date(filtroPeriodo.inicio)) &&
+      (filtroPeriodo.fim === "" || new Date(item.periodo) <= new Date(filtroPeriodo.fim));
+    return nomeOk && categoriaOk && valorOk && periodoOk;
+  });
+}
+
     return () => {
+
+<div className="filtros flex flex-wrap gap-2 p-2">
+  <input type="text" placeholder="Filtrar por nome" value={filtroNome} onChange={e => setFiltroNome(e.target.value)} className="border p-1 rounded" />
+  <input type="text" placeholder="Filtrar por categoria" value={filtroCategoria} onChange={e => setFiltroCategoria(e.target.value)} className="border p-1 rounded" />
+  <input type="number" placeholder="Filtrar por valor" value={filtroValor} onChange={e => setFiltroValor(e.target.value)} className="border p-1 rounded" />
+  <input type="date" value={filtroPeriodo.inicio} onChange={e => setFiltroPeriodo({ ...filtroPeriodo, inicio: e.target.value })} className="border p-1 rounded" />
+  <input type="date" value={filtroPeriodo.fim} onChange={e => setFiltroPeriodo({ ...filtroPeriodo, fim: e.target.value })} className="border p-1 rounded" />
+</div>
+
       console.log('[DEBUG] Executando cleanup...');
       if (unsubscribe && typeof unsubscribe === 'function') {
         unsubscribe();
@@ -281,6 +306,23 @@ function formatarValor(valor) {
 
 
   const [tipoFiltroLista, setTipoFiltroLista]= useState([])
+  const [filtroNome, setFiltroNome] = useState("");
+  const [filtroCategoria, setFiltroCategoria] = useState("");
+  const [filtroValor, setFiltroValor] = useState("");
+  const [filtroPeriodo, setFiltroPeriodo] = useState({ inicio: "", fim: "" });
+
+  function aplicarFiltros(lista) {
+  return lista.filter(item => {
+    const nomeOk = filtroNome === "" || (item.descricao || "").toLowerCase().includes(filtroNome.toLowerCase());
+    const categoriaOk = filtroCategoria === "" || (item.categoria || "").toLowerCase().includes(filtroCategoria.toLowerCase());
+    const valorOk = filtroValor === "" || parseFloat(item.valor) === parseFloat(filtroValor);
+    const periodoOk =
+      (filtroPeriodo.inicio === "" || new Date(item.periodo) >= new Date(filtroPeriodo.inicio)) &&
+      (filtroPeriodo.fim === "" || new Date(item.periodo) <= new Date(filtroPeriodo.fim));
+    return nomeOk && categoriaOk && valorOk && periodoOk;
+  });
+}
+
 
   useEffect(() => {
     const unsubscribe = buscarPorTipo(tipoFiltro, (dados) => {
@@ -626,7 +668,13 @@ function formatarValor(valor) {
               </Disclosure>
 
  
-              <input className="m-[14px]" type="text"/>
+              <input
+  className="m-[14px] border p-1 rounded"
+  type="text"
+  placeholder="Buscar por nome"
+  value={filtroNome}
+  onChange={(e) => setFiltroNome(e.target.value)}
+/>
 
             {/* </div> */}
 
@@ -645,7 +693,7 @@ function formatarValor(valor) {
 
         <section id="dados" className='p-4 rounded-lg bg-[#f6f6f6]' flex justify-between>
           <ul className="list-none gap-4 flex flex-wrap items-start justify-center">
-            {listaDados.map((item, index) => (
+            {aplicarFiltros(listaDados).map((item, index) => (
               <li
                 className="list-none rounded-lg border-2 flex flex-row justify-center max-w-[250px] max-h-[350px] w-full h-auto min-w-[195px] min-h-[90px]"
                 key={item.id}
