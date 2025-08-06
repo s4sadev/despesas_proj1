@@ -65,7 +65,7 @@ export default function PageCadastro(){
                 <label htmlFor="">Senha</label>
                 <input required type="text" name="senha" />
 
-                <span>
+                <span className='flex flex-row justify-between'>
                     <Link to="/"><button type="button">Voltar para o Login</button></Link>
                     <button type="submit">Criar conta</button>
                 </span>
