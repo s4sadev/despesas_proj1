@@ -1,100 +1,113 @@
-import { Link } from 'react-router-dom';
-import {useEffect, useState} from 'react';
-import {loginEmail, loginGoogle} from '../services/auth'
-
-
-import {auth} from "../firebase/firebaseAuth"
-
+import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { auth } from "../firebase/firebaseAuth";
 import {
-  createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup
 } from "firebase/auth";
 
-import { useNavigate } from 'react-router-dom';
+export default function Login() {
+  const [valorDigitado, setValorDigitado] = useState("");
+  const [mostrarAlert, setMostrarAlert] = useState(false);
+  const [estiloInput, setEstiloInput] = useState(false);
 
-// temos as funções, agora precisamos capturar o valor digitado e passar para a veriavel da forma correta
+  const provider = new GoogleAuthProvider();
+  const navigate = useNavigate();
 
-export default function Login(){
-    const teste = `border-color-500`
-    const [valorDigitado, setValorDigitado] = useState("")
-    const [mostrarAlert, setMostrarAlert] = useState(false)
-    const [estiloInput, setEstiloInput] = useState(false)
-    const provider = new GoogleAuthProvider();
-    const navigate = useNavigate();
+  function EnviarDados(e) {
+    e.preventDefault();
 
-    function EnviarDados(e){
-        e.preventDefault();
+    const email = e.target.email.value;
+    const senha = e.target.senha.value;
 
-        // capturar dados/inputs
-        const email = e.target.email.value
-        const senha = e.target.senha.value
+    signInWithEmailAndPassword(auth, email, senha)
+      .then((userCredential) => {
+        console.log('Usuário logado!', userCredential.user);
+        navigate('/home');
+      })
+      .catch((erro) => {
+        console.error('Erro ao logar: ', erro.message);
+      });
+  }
 
-        // realizar a validação
-        signInWithEmailAndPassword(auth, email, senha)
-        .then((usercredential) => {
-            console.log('usuario logado!', usercredential.user)
-            navigate('/home')
-            
+  function AtivarPopUp() {
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        console.log("Usuário autenticado com o Google", result.user);
+        navigate('/home');
+      })
+      .catch((error) => {
+        console.error("Erro ao autenticar com Google: ", error.message, error.code);
+      });
+  }
 
-        })
-        .catch((erro) => {
-            console.error('erro ao logar: ', erro.message)
-        })
+  function DetectarValorDigitado(valor) {
+    if (valor.length > 0 && valor.length < 6) {
+      setEstiloInput(true);
+      setMostrarAlert(true);
+    } else {
+      setEstiloInput(false);
+      setMostrarAlert(false);
     }
+  }
 
-    function AtivarPopUp(){
-        signInWithPopup(auth, provider)
-        .then((result)=> {
-            console.log("Usuario autenticado com o google", result.user)
-            navigate('/home')
-        })
-        .catch((error) => {
-            console.error("Erro ao autenticar com Google: ", error.message, error.code)
-        })
-    }
+  useEffect(() => {
+    DetectarValorDigitado(valorDigitado);
+  }, [valorDigitado]);
 
+  return (
+    <div className="flex justify-center flex-col w-full items-center p-4">
+      <h1 className="text-2xl font-bold mb-4">Faça o seu Login</h1>
 
-    function DetectarValorDigitado(valor){
-        if(valor.length > 0 && valor.length < 6){
-            setEstiloInput(true)
-            setMostrarAlert(true)
-            console.log("tem mais de 6!")
-        }
-        else {
-            const estilo2 = {
-                border: "solid 1px black",
-            }
-            setEstiloInput(false)
-            setMostrarAlert(false)
-            console.log("Não tem mais de 6")
-        }
-    }
-    useEffect(()=> {
-        console.log(valorDigitado)
-        DetectarValorDigitado(valorDigitado)
+      <form
+        className="flex flex-col w-1/2 justify-center gap-2"
+        onSubmit={EnviarDados}
+      >
+        <label htmlFor="email">Email</label>
+        <input
+          type="text"
+          name="email"
+          required
+          className="border border-black p-2 rounded"
+        />
 
-    }, [valorDigitado]);
+        <label htmlFor="senha">Senha</label>
+        <input
+          type="password"
+          name="senha"
+          required
+          id="senha-input"
+          onChange={(e) => setValorDigitado(e.target.value)}
+          className={`p-2 rounded border focus:outline-none ${
+            estiloInput ? "border-red-500" : "border-black"
+          }`}
+        />
 
-    return(
-        <div class="flex justify-center flex-col w-[100%] items-center">
-            <h1 class="">Faça o seu Login</h1>
-            <form class="flex flex-col w-[50%] justify-center" action="" method="post" onSubmit={(e) => EnviarDados(e)}>
-                <label htmlFor="">Email</label>
-                <input type="text" required name='email' />
+        <p className={`text-left text-red-500 ${mostrarAlert ? "inline" : "hidden"}`}>
+          A quantidade mínima de caracteres é 6
+        </p>
 
-                <label htmlFor="">Senha</label>
-                <input type="text" className={` focus:outline-none   ${estiloInput ? "border-red-500" : "border-black"}`} id="senha-input" onChange={(e) => setValorDigitado(e.target.value)} required name='senha' />
-                <p  className={`text-left text-red-500 ${mostrarAlert ? "inline":"hidden"}`}>A quantidade minima de caracteres é 6</p>
-                <span class="flex ">
+        <div className="flex justify-between mt-4 gap-4">
+          <Link to="/cadastro">
+            <button type="button" className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300">
+              Me cadastrar
+            </button>
+          </Link>
 
-                    <Link to="/cadastro"><button>Me cadastrar</button></Link>
-                    <button type='submit'>Acessar</button>
-                </span>
-            </form>
-
-                <button onClick={() => AtivarPopUp()}>Logar com o google</button>
+          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            Acessar
+          </button>
         </div>
-    )
+
+        <button
+          type="button"
+          onClick={AtivarPopUp}
+          className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+        >
+          Logar com o Google
+        </button>
+      </form>
+    </div>
+  );
 }
