@@ -6,8 +6,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        main: './index.html',
-        manifest: './src/manifest.json'  // CAMINHO CORRETO
+        main: './index.html'
       }
     }
   }
