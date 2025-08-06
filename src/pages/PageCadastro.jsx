@@ -57,7 +57,7 @@ export default function PageCadastro(){
             </span>
 
 
-            <form action="" class="flex flex-col" onSubmit={(e) => EnviarDados(e)}>
+            <form action="" className="flex flex-col" onSubmit={(e) => EnviarDados(e)}>
 
                 <label htmlFor="">Email</label>
                 <input required type="text" name="email" />

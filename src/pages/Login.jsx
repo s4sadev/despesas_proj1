@@ -80,7 +80,7 @@ export default function Login(){
     return(
         <div class="flex justify-center flex-col w-[100%] items-center">
             <h1 class="">Faça o seu Login</h1>
-            <form class="flex flex-col w-[50%] justify-center" action="" method="post" onSubmit={(e) => EnviarDados(e)}>
+            <form class="flex flex-col" action="" method="post" onSubmit={(e) => EnviarDados(e)}>
                 <label htmlFor="">Email</label>
                 <input type="text" required name='email' />
 
@@ -91,10 +91,13 @@ export default function Login(){
                 <span class="flex ">
                     <Link to="/cadastro"><button type="button">Me cadastrar</button></Link>
                     <button type='submit'>Acessar</button>
+                    
                 </span>
+                 <span className='flex w-[100%] justify-end'>
+                <button className='flex  border-2' onClick={() => AtivarPopUp()}>Logar com o google</button>
+            </span>
             </form>
-
-                <button onClick={() => AtivarPopUp()}>Logar com o google</button>
+           
         </div>
     )
 }
