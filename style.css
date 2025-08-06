@@ -1,0 +1,54 @@
+body {
+    background: linear-gradient(to left, rgb(255, 164, 247), rgb(152, 76, 153));
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    margin: 10px;
+    height: 100vh;
+    font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+
+}
+
+.btn-cadastro {
+    background-color: rgb(255, 255, 255);
+    color: black;
+    border-radius: 30px;
+    margin: 10px;
+
+}
+
+.btn-cadastro:hover {
+    background-color: rgb(125, 3, 139);
+    color: white;
+    justify-content: center;
+    font-size: xx-large;
+}
+
+.flex {
+    
+    justify-content: center;
+    width: 100vh;
+    
+}
+
+.btn-acessar{
+    background-color: rgb(54, 108, 0);
+    border-radius: 30px;
+    margin: 10px;
+    color: white;
+    justify-content: center;
+    
+}
+
+.btn-acessar:hover{
+    background-color: rgb(63, 255, 60);
+    color: black;
+}
+
+.title-login{
+    font-size: xx-large;
+    background-color: rgb(151, 51, 144);
+    border-radius: 50px;
+    padding:20px;
+    color: white;
+}
