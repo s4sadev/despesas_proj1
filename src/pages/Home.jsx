@@ -31,7 +31,7 @@ import {
 
 
 import { db } from '../firebase/firebasedb';
-import Swal from 'sweetalert2';
+
 
 import { onAuthStateChanged } from "firebase/auth";
 import { getAuth } from "firebase/auth";
@@ -547,13 +547,6 @@ function buscarPorTipo(uid, tipoDesejado, callback) {
     addDoc(ref, dados).then((docRef) => {
       console.log('Documento salvo com ID:', docRef.id);
       window.alert("Deu certo!")
-      Swal.fire({
-        position: "top-end",
-        icon: "success",
-        title: "Registro salvo com sucesso",
-        showConfirmButton: false,
-        timer: 1500
-      });
     });
 
     setIsOpenSave(false).catch((erro) => {
@@ -583,13 +576,7 @@ function buscarPorTipo(uid, tipoDesejado, callback) {
         tipo: dadosEdit.tipo,
       });
 
-      Swal.fire({
-        position: "top-end",
-        icon: "success",
-        title: "Registro atualizado com sucesso",
-        showConfirmButton: false,
-        timer: 1500
-      });
+
       buscarDados(); // recarrega a lista
       closeModalEdit(); // se tiver modal
     } catch (erro) {
