@@ -83,27 +83,26 @@ export default function Login() {
     return (
         <div className='flex flex-row justify-center items-center h-screen'>
             <div className="bg-white w-[70%] p-6 flex flex-col items-center justify-center border shadow-lg rounded-lg" >
-                <h1 class="">Faça o seu Login</h1>
+                <h1 class="font-bold text-xl">Faça o seu Login</h1>
 
 
                 <form class="flex flex-col w-[90%]" action="" method="post" onSubmit={(e) => EnviarDados(e)}>
                     <label htmlFor="">Email</label>
-                    <input type="text" required name='email' />
+                    <input type="text" placeholder='Digite seu email' required name='email' />
 
                     <label htmlFor="">Senha</label>
-                    <input type="text" className={` focus:outline-none   ${estiloInput ? "border-red-500" : "border-black"}`} id="senha-input" onChange={(e) => setValorDigitado(e.target.value)} required name='senha' />
+                    <input type="text" placeholder='Digite sua senha' className={` focus:outline-none border-gray-300  ${estiloInput ? "border-red-500" : "border-black"}`} id="senha-input" onChange={(e) => setValorDigitado(e.target.value)} required name='senha' />
                     <p className={`text-left text-red-500 ${mostrarAlert ? "inline" : "hidden"}`}>A quantidade minima de caracteres é 6</p>
 
                     {/* <span class="flex flx-row justify-between"> */}
                     <span className='flex flex-col items-center w-[100%] justify-center'>
-                        <button className='border-2 w-full mb-1' type='submit'>Login</button>
+                        <button className='border-2 w-full mb-1 bg-green-500 border-green-600 font-bold text-white hover:bg-green-500/90' type='submit'>Login</button>
                         
 
-                        <span>
-                        <img src={google_ico} alt="" />
-                        <button className='w-full border-2' onClick={() => AtivarPopUp()}>Logar com o google</button>
-
-                        </span>
+                        <button className='flex items-center justify-center w-full border-2 gap-2' onClick={() => AtivarPopUp()}>
+                            <img className='max-w-[20px] max-h-[20px] w-full h-full p-1' src={google_ico} alt="" />
+                            Logar com o google
+                        </button>
 
                         <p>Não tem uma conta ? <Link className='text-rose-500 font-medium' to="/cadastro">Cadastre-se clicando aqui!</Link></p>                        
                     </span>
