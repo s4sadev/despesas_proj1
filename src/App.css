@@ -7,7 +7,13 @@
 }
 
 body{
-  background-color: rgba(236, 128, 142, 0.562);
+  /* background-image: url(https://media.istockphoto.com/id/1395723007/pt/vetorial/pink-orange-yellow-and-red-color-gradient-summer-defocused-blurred-motion-abstract.jpg?s=612x612&w=0&k=20&c=8stKuwHygUw_sxp56PVSQ1CQzPbfOAN-PFNBBt41-VI=);
+  background-size:cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  min-height: 100vh; */
+  background-color: #f07d7d81;
+
 }
 
 .logo {
