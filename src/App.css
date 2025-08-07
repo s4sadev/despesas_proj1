@@ -1,8 +1,13 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0;
   text-align: center;
+
+}
+
+body{
+  background-color: rgba(224, 84, 96, 0.61);
 }
 
 .logo {

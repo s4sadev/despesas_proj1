@@ -2,6 +2,9 @@ import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { loginEmail, loginGoogle } from '../services/auth'
 
+import google_ico from '../assets/google-ico.png';
+
+import '../App.css'
 
 import { auth } from "../firebase/firebaseAuth"
 
@@ -78,27 +81,39 @@ export default function Login() {
     }, [valorDigitado]);
 
     return (
-        <div class="">
-            <h1 class="">Faça o seu Login</h1>
+        <div className='flex flex-row justify-center items-center h-screen'>
+            <div className="bg-white w-[70%] p-6 flex flex-col items-center justify-center border shadow-lg rounded-lg" >
+                <h1 class="">Faça o seu Login</h1>
 
 
-            <form class="flex flex-col w-[90%]" action="" method="post" onSubmit={(e) => EnviarDados(e)}>
-                <label htmlFor="">Email</label>
-                <input type="text" required name='email' />
+                <form class="flex flex-col w-[90%]" action="" method="post" onSubmit={(e) => EnviarDados(e)}>
+                    <label htmlFor="">Email</label>
+                    <input type="text" required name='email' />
 
-                <label htmlFor="">Senha</label>
-                <input type="text" className={` focus:outline-none   ${estiloInput ? "border-red-500" : "border-black"}`} id="senha-input" onChange={(e) => setValorDigitado(e.target.value)} required name='senha' />
-                <p className={`text-left text-red-500 ${mostrarAlert ? "inline" : "hidden"}`}>A quantidade minima de caracteres é 6</p>
+                    <label htmlFor="">Senha</label>
+                    <input type="text" className={` focus:outline-none   ${estiloInput ? "border-red-500" : "border-black"}`} id="senha-input" onChange={(e) => setValorDigitado(e.target.value)} required name='senha' />
+                    <p className={`text-left text-red-500 ${mostrarAlert ? "inline" : "hidden"}`}>A quantidade minima de caracteres é 6</p>
 
-                <span class="flex flx-row justify-between">
-                    <Link to="/cadastro"><button type="button">Me cadastrar</button></Link>
-                    <button type='submit'>Acessar</button>
-                </span>
+                    {/* <span class="flex flx-row justify-between"> */}
+                    <span className='flex flex-col items-center w-[100%] justify-center'>
+                        <button className='border-2 w-full mb-1' type='submit'>Login</button>
+                        
 
-                <span className='flex w-[100%] justify-end'>
-                    <button className='flex  border-2' onClick={() => AtivarPopUp()}>Logar com o google</button>
-                </span>
-            </form>
+                        <span>
+                        <img src={google_ico} alt="" />
+                        <button className='w-full border-2' onClick={() => AtivarPopUp()}>Logar com o google</button>
+
+                        </span>
+
+                        <p>Não tem uma conta ? <Link className='text-rose-500 font-medium' to="/cadastro">Cadastre-se clicando aqui!</Link></p>                        
+                    </span>
+
+                    {/* </span> */}
+
+
+                </form>
+            </div>
+
 
         </div>
     )

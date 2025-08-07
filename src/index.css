@@ -5,6 +5,7 @@
 /* Agora não precisa de @reference */
 
 @layer base {
+
   *{
     @apply text-[clamp(0.90rem,1vw,2rem)]
   }
@@ -25,9 +26,11 @@
     @apply bg-white;
   }
   #dash div{
-    @apply min-h-[50px] min-w-[100px] max-w-[190px] w-full rounded-lg font-bold border-2 text-lg h-full m-2 p-2 text-center;
+    @apply min-h-[50px] min-w-[100px] max-w-[190px] w-full rounded-lg font-bold border-2 text-lg h-full m-2 text-center;
   }
+  /* p-2 tirado de #dash div */
   #root{
-    @apply flex flex-col gap-2;
+    @apply flex flex-col;
   }
+  /* gap-2 tirado de root  */
 }
