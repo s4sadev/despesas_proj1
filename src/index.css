@@ -7,7 +7,7 @@
 @layer base {
 
   *{
-    @apply text-[clamp(1.2rem,1vw,4rem)]
+    @apply text-[clamp(0.8rem,1vw,2rem)]
   }
   button {
     @apply rounded-lg p-1 px-4 m-4  cursor-pointer;
