@@ -81,7 +81,7 @@ export default function Login() {
     }, [valorDigitado]);
 
     return (
-        <div className="flex flex-row justify-center items-center min-h-screen bg-[url('/sua-imagem.jpg')] bg-cover bg-no-repeat bg-center px-4">
+        <div className="bg-rose-300 flex flex-row justify-center items-center min-h-screen bg-[url('/sua-imagem.jpg')] bg-cover bg-no-repeat bg-center px-4">
             <div className="bg-white w-[90%] max-w-md min-w-[268px] h-[55%] p-6 flex flex-col items-center gap-2 justify-center border shadow-lg rounded-lg">
 
                 <h1 className="font-bold text-xl">Bem-vindo! Faça o seu Login</h1>
