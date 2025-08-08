@@ -666,7 +666,7 @@ export function Home() {
             <h1 className="text-start text-2xl md:text-3xl font-bold w-full">Minhas Despesas</h1>
           </span>
 
-            <span className="b">
+            <span className="">
               <img src={photoUrl} className="border-2  aspect-square max-w-[50px] w-[40px] rounded-full" alt="photo_user" />
             </span>
 
@@ -682,14 +682,14 @@ export function Home() {
 
           <div className="card-dash bg-green-100 border-green-200" id="mais">
             <h1 className="text-start m-2">Receitas</h1>
-            <p className='text-lg m-2'>
+            <p className='text-lg m-2 break-words'>
               {formatarParaReais(CalcularReceita(listaReceita))}
             </p>
           </div>
 
           <div className="card-dash bg-red-100 border-red-200" id="menos">
             <h1 className="text-start m-2">Depesas</h1>
-            <p className='text-lg m-2'>
+            <p className='text-lg m-2 break-words'>
               {formatarParaReais(CalcularDespesa(listaDespesa))}
             </p>
           </div>
@@ -697,7 +697,7 @@ export function Home() {
 
           <div className="card-dash" id="atual">
             <h1 className="text-start m-2">Saldo Atual</h1>
-            <p className='text-lg m-2'>
+            <p className='text-lg m-2 break-words'>
               {formatarParaReais(CalcularSaldo(receita, despesa))}
             </p>
           </div>
