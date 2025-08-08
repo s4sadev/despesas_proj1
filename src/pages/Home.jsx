@@ -1,5 +1,5 @@
 import React, { use } from "react";
-import trash from '../assets/trash.png' 
+import trash from '../assets/trash.png'
 import edit from '../assets/edit.png'
 import receita_ico from '../assets/mais_card.png'
 import despesa_ico from '../assets/menos_card.png'
@@ -24,9 +24,9 @@ import {
   DialogTitle,
   DialogPanel,
   Transition,
-  Disclosure, 
-  DisclosureButton, 
-  DisclosurePanel ,
+  Disclosure,
+  DisclosureButton,
+  DisclosurePanel,
 } from '@headlessui/react';
 
 
@@ -35,6 +35,7 @@ import { db } from '../firebase/firebasedb';
 
 import { onAuthStateChanged } from "firebase/auth";
 import { getAuth } from "firebase/auth";
+import { signOut } from "firebase/auth";
 
 
 
@@ -53,6 +54,7 @@ export function Home() {
   const [despesa, setDespesa] = useState()
   const [receita, setReceita] = useState()
   const [filtros, setFiltros] = useState(false)
+  const [photoUrl, setPhotoUrl] = useState(null)
 
   const [tipoFiltro, setTipoFiltro] = useState(" ")
   const [saldo, setSaldo] = useState()
@@ -68,7 +70,7 @@ export function Home() {
 
 
 
-  function tratarPeriodo(valorOriginal){
+  function tratarPeriodo(valorOriginal) {
     const [data, hora] = valorOriginal.split("T"); // separa em ['2025-07-04', '11:09']
     const [ano, mes, dia] = data.split("-"); // separa em ['2025', '07', '04']
 
@@ -79,45 +81,45 @@ export function Home() {
 
   }
 
-async function buscarDespesa() {
-  const ref = collection(db, "despesas");
+  async function buscarDespesa() {
+    const ref = collection(db, "despesas");
 
-  // ⬇️ Aqui aplicamos o filtro
-  const filtro = query(ref, where("categoria", "==", "Despesa"));
+    // ⬇️ Aqui aplicamos o filtro
+    const filtro = query(ref, where("categoria", "==", "Despesa"));
 
-  const resultado = onSnapshot(filtro, (querySnapshot) => {
-    console.log("🚨 querySnapshot recebida:", querySnapshot);
+    const resultado = onSnapshot(filtro, (querySnapshot) => {
+      console.log("🚨 querySnapshot recebida:", querySnapshot);
 
-    querySnapshot.docs.forEach((doc, index) => {
-      console.log(`📄 Documento DA Despesa ${index + 1}:`, {
-        id: doc.id,
-        dadosBrutos: doc.data(),
-        timestampBruto: doc.data().periodo,
+      querySnapshot.docs.forEach((doc, index) => {
+        console.log(`📄 Documento DA Despesa ${index + 1}:`, {
+          id: doc.id,
+          dadosBrutos: doc.data(),
+          timestampBruto: doc.data().periodo,
+        });
       });
+
+      const novosDados = querySnapshot.docs.map((doc) => {
+        const dados = doc.data();
+
+        return {
+          id: doc.id,
+          ...dados,
+          periodo: dados.periodo ? converterTimestamp(dados.periodo) : null,
+        };
+      });
+
+      console.log("✅ Dados processados:", novosDados);
+      setDespesaDash(novosDados);
     });
 
-    const novosDados = querySnapshot.docs.map((doc) => {
-      const dados = doc.data();
+    return resultado; // ✅ agora sim retorna a função que pode ser usada no cleanup
+  }
 
-      return {
-        id: doc.id,
-        ...dados,
-        periodo: dados.periodo ? converterTimestamp(dados.periodo) : null,
-      };
-    });
-
-    console.log("✅ Dados processados:", novosDados);
-    setDespesaDash(novosDados);
-  });
-
-  return resultado; // ✅ agora sim retorna a função que pode ser usada no cleanup
-}
-
-  function getTipoImg(tipo){
+  function getTipoImg(tipo) {
     switch (tipo) {
       case "Despesa":
         return despesa_ico;
-      
+
       case "Receita":
         return receita_ico;
 
@@ -127,11 +129,11 @@ async function buscarDespesa() {
     }
   }
 
-  function getCategoriaStyle(categoria){
+  function getCategoriaStyle(categoria) {
     switch (categoria) {
       case "Alimentação":
         return "bg-yellow-500 text-white"
-      
+
       case "Higiene":
         return "bg-blue-500 text-white"
 
@@ -142,11 +144,11 @@ async function buscarDespesa() {
         return "bg-blue-200 text-white"
 
       case "Entretenimento":
-        return "bg-red-400 text-white"      
-      
+        return "bg-red-400 text-white"
+
       case "Moradia":
         return "bg-[#5c4323] text-white"
-    
+
       default:
         console.log("Olha a categoria", categoria);
         return "bg-black text-white"
@@ -182,17 +184,17 @@ async function buscarDespesa() {
     setIsOpenSave(true);
   }
 
-  function CalcularDespesa(listaDespesa){
-    
+  function CalcularDespesa(listaDespesa) {
+
     var totalD = 0;
     listaDespesa.forEach(u => {
       totalD += parseFloat(u);
     });
     return totalD
   }
-  
-  function CalcularReceita(listaReceita){
-    
+
+  function CalcularReceita(listaReceita) {
+
     var totalR = 0;
     listaReceita.forEach(e => {
       totalR += parseFloat(e);
@@ -200,7 +202,7 @@ async function buscarDespesa() {
     return totalR
   }
 
-  function CalcularSaldo(receita, despesa){
+  function CalcularSaldo(receita, despesa) {
     var x = 0;
     x = receita - despesa;
     return x
@@ -208,66 +210,75 @@ async function buscarDespesa() {
 
   const [valor, setValor] = useState("");
 
-async function buscarPropriedadePorId(id, propriedade) {
-  try {
-    const ref = doc(db, "suaColecao", id); // troque "suaColecao" pelo nome da sua coleção
-    const docSnap = await getDoc(ref);
+  async function buscarPropriedadePorId(id, propriedade) {
+    try {
+      const ref = doc(db, "suaColecao", id); // troque "suaColecao" pelo nome da sua coleção
+      const docSnap = await getDoc(ref);
 
-    if (docSnap.exists()) {
-      const dados = docSnap.data();
-      setValor(dados) // retorna só a propriedade desejada
-    } else {
-      console.log("Documento não encontrado.");
-      return 0;
+      if (docSnap.exists()) {
+        const dados = docSnap.data();
+        setValor(dados) // retorna só a propriedade desejada
+      } else {
+        console.log("Documento não encontrado.");
+        return 0;
+      }
+    } catch (erro) {
+      console.error("Erro ao buscar documento:", erro);
+      return null;
     }
-  } catch (erro) {
-    console.error("Erro ao buscar documento:", erro);
-    return null;
   }
-}
 
   function handleChange(e) {
-  const valorDigitado = e.target.value;
-  const valorFormatado = formatarParaReaisInput(valorDigitado);
-  setValor(valorFormatado);
-}
+    const valorDigitado = e.target.value;
+    const valorFormatado = formatarParaReaisInput(valorDigitado);
+    setValor(valorFormatado);
+  }
 
   function formatarParaReais(valor) {
-  return parseFloat(valor).toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  });
-}
+    return parseFloat(valor).toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+  }
 
-function formatarParaReaisInput(valor) {
-  valor = valor.replace(/\D/g, ""); // remove tudo que não for número
-  valor = (Number(valor) / 100).toFixed(2); // divide por 100 e mantém duas casas decimais
-  return valor
-    .toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
+  function formatarParaReaisInput(valor) {
+    valor = valor.replace(/\D/g, ""); // remove tudo que não for número
+    valor = (Number(valor) / 100).toFixed(2); // divide por 100 e mantém duas casas decimais
+    return valor
+      .toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  }
 
-function formatarValor(valor) {
-  // Remove tudo que não for número ou vírgula
-  let valorNumerico = valor.replace(/[^\d,]/g, "");
+  function formatarValor(valor) {
+    // Remove tudo que não for número ou vírgula
+    let valorNumerico = valor.replace(/[^\d,]/g, "");
 
-  // Substitui vírgula por ponto para usar como número float
-  valorNumerico = valorNumerico.replace(",", ".");
+    // Substitui vírgula por ponto para usar como número float
+    valorNumerico = valorNumerico.replace(",", ".");
 
-  // Converte para float
-  const numero = parseFloat(valorNumerico);
+    // Converte para float
+    const numero = parseFloat(valorNumerico);
 
-  // Se não for número, retorna vazio
-  if (isNaN(numero)) return "";
+    // Se não for número, retorna vazio
+    if (isNaN(numero)) return "";
 
-  // Formata como moeda brasileira
-  return numero.toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  });
-}
+    // Formata como moeda brasileira
+    return numero.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+  }
 
-    
-             
+  function Deslogar() {
+    signOut(auth)
+      .then(() => {
+        console.log("Usuario deslogado com sucesso!")
+      })
+      .catch(() => {
+        console.error("Houve um erro ao deslogar", error)
+      })
+  }
+
+
   useEffect(() => {
     console.log('[DEBUG] Chamando buscarDados()...');
     const unsubscribe = buscarDados();
@@ -291,13 +302,13 @@ function formatarValor(valor) {
 
     return () => {
 
-    // <div className="filtros flex flex-wrap gap-2 p-2">
-    //   <input type="text" placeholder="Filtrar por nome" value={filtroNome} onChange={e => setFiltroNome(e.target.value)} className="border p-1 rounded" />
-    //   <input type="text" placeholder="Filtrar por categoria" value={filtroCategoria} onChange={e => setFiltroCategoria(e.target.value)} className="border p-1 rounded" />
-    //   <input type="number" placeholder="Filtrar por valor" value={filtroValor} onChange={e => setFiltroValor(e.target.value)} className="border p-1 rounded" />
-    //   <input type="date" value={filtroPeriodo.inicio} onChange={e => setFiltroPeriodo({ ...filtroPeriodo, inicio: e.target.value })} className="border p-1 rounded" />
-    //   <input type="date" value={filtroPeriodo.fim} onChange={e => setFiltroPeriodo({ ...filtroPeriodo, fim: e.target.value })} className="border p-1 rounded" />
-    // </div>
+      // <div className="filtros flex flex-wrap gap-2 p-2">
+      //   <input type="text" placeholder="Filtrar por nome" value={filtroNome} onChange={e => setFiltroNome(e.target.value)} className="border p-1 rounded" />
+      //   <input type="text" placeholder="Filtrar por categoria" value={filtroCategoria} onChange={e => setFiltroCategoria(e.target.value)} className="border p-1 rounded" />
+      //   <input type="number" placeholder="Filtrar por valor" value={filtroValor} onChange={e => setFiltroValor(e.target.value)} className="border p-1 rounded" />
+      //   <input type="date" value={filtroPeriodo.inicio} onChange={e => setFiltroPeriodo({ ...filtroPeriodo, inicio: e.target.value })} className="border p-1 rounded" />
+      //   <input type="date" value={filtroPeriodo.fim} onChange={e => setFiltroPeriodo({ ...filtroPeriodo, fim: e.target.value })} className="border p-1 rounded" />
+      // </div>
 
       console.log('[DEBUG] Executando cleanup...');
       if (unsubscribe && typeof unsubscribe === 'function') {
@@ -306,36 +317,40 @@ function formatarValor(valor) {
       } else {
         console.warn('[DEBUG] Nada para limpar - unsubscribe não é função');
       }
-    };      
-  }, []);  
+    };
+  }, []);
 
 
-  const [tipoFiltroLista, setTipoFiltroLista]= useState([])
+  const [tipoFiltroLista, setTipoFiltroLista] = useState([])
   const [filtroNome, setFiltroNome] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState("");
   const [filtroValor, setFiltroValor] = useState("");
   const [filtroPeriodo, setFiltroPeriodo] = useState({ inicio: "", fim: "" });
 
   function aplicarFiltros(lista) {
-  return lista.filter(item => {
-    const nomeOk = filtroNome === "" || (item.descricao || "").toLowerCase().includes(filtroNome.toLowerCase());
-    const categoriaOk = filtroCategoria === "" || (item.categoria || "").toLowerCase().includes(filtroCategoria.toLowerCase());
-    const valorOk = filtroValor === "" || parseFloat(item.valor) === parseFloat(filtroValor);
-    const periodoOk =
-      (filtroPeriodo.inicio === "" || new Date(item.periodo) >= new Date(filtroPeriodo.inicio)) &&
-      (filtroPeriodo.fim === "" || new Date(item.periodo) <= new Date(filtroPeriodo.fim));
-    return nomeOk && categoriaOk && valorOk && periodoOk;
-  });
-}
+    return lista.filter(item => {
+      const nomeOk = filtroNome === "" || (item.descricao || "").toLowerCase().includes(filtroNome.toLowerCase());
+      const categoriaOk = filtroCategoria === "" || (item.categoria || "").toLowerCase().includes(filtroCategoria.toLowerCase());
+      const valorOk = filtroValor === "" || parseFloat(item.valor) === parseFloat(filtroValor);
+      const periodoOk =
+        (filtroPeriodo.inicio === "" || new Date(item.periodo) >= new Date(filtroPeriodo.inicio)) &&
+        (filtroPeriodo.fim === "" || new Date(item.periodo) <= new Date(filtroPeriodo.fim));
+      return nomeOk && categoriaOk && valorOk && periodoOk;
+    });
+  }
   const [uid, setUid] = useState(null);
-    const [carregando, setCarregando] = useState(true);
+  const [carregando, setCarregando] = useState(true);
 
 
-useEffect(() => {
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUid(user.uid);
+        setPhotoUrl(user.photoURL)
+
         console.log("✅ UID carregado:", user.uid);
+        console.log("Photo url", user.photoURL)
+
       } else {
         console.warn("Usuário não logado");
       }
@@ -367,7 +382,7 @@ useEffect(() => {
       // aqui você pode setar no estado, por exemplo
       var listaX = []
       dados.forEach(e => {
-          listaX.push(e)
+        listaX.push(e)
       });
 
       setTipoFiltroLista(listaX)
@@ -381,15 +396,24 @@ useEffect(() => {
   }, [tipoFiltro]);
 
 
+  // Responsaveis por obter dados  como receitas e despesas assim que a pagina carrega
 
+  // Busca todas as despesas
   useEffect(() => {
+
+    //verifica se a UID foi recebida, se não, da um return
+    if (!uid) {
+      console.warn("O UID Ainda não existe viuu!!!!")
+      return;
+    }
+
     const unsubscribe = buscarPorTipo(uid, "Despesa", (dados) => {
-      // aqui você pode setar no estado, por exemplo
+
       setDespesaDash(dados);
 
       var listaD = []
       dados.forEach(e => {
-          listaD.push(e.valor)
+        listaD.push(e.valor)
       });
       setListaDespesa(listaD);
 
@@ -399,27 +423,34 @@ useEffect(() => {
 
 
     return () => unsubscribe?.();
-  }, []);
+  }, [uid]);
 
-    useEffect(() => {
-    const unsubscribe = buscarPorTipo(uid, 
+  //Busca todas as receitas
+  useEffect(() => {
+    if (!uid) {
+      console.warn("O UID Ainda não existe viuu!!!!")
+      return;
+    }
+
+    console.log("Agora existe!")
+    const unsubscribe = buscarPorTipo(uid,
       "Receita", (dados) => {
-      // aqui você pode setar no estado, por exemplo
-      setDespesaDash(dados);
+        console.log("Aqui esta sendo inciado a busca das despesasss!!!!")
+        setDespesaDash(dados);
 
-      var listaR = []
-      dados.forEach(e => {
+        var listaR = []
+        dados.forEach(e => {
           listaR.push(e.valor)
-      });
-      setListaReceita(listaR);
+        });
+        setListaReceita(listaR);
 
-      console.log("Aqui dados", dados)
-      console.log("Aqui é a lista despesa: ", listaReceita)
-    });
+        console.log("Aqui dados", dados)
+        console.log("Aqui é a lista despesa: ", listaReceita)
+      });
 
 
     return () => unsubscribe?.();
-  }, []);
+  }, [uid]);
 
 
 
@@ -440,41 +471,41 @@ useEffect(() => {
   }, [listaDespesa, listaReceita])
 
   useEffect(() => {
-      console.log("Receita", receita)
-      console.log("Despesa", despesa)
-  },[receita,despesa])
+    console.log("Receita", receita)
+    console.log("Despesa", despesa)
+  }, [receita, despesa])
 
 
   // READ - LER
-async function buscarDados() {
-  if (!uid) {
-    console.warn("UID ainda não disponível.");
-    return;
-  }
+  async function buscarDados() {
+    if (!uid) {
+      console.warn("UID ainda não disponível.");
+      return;
+    }
 
-  const ref = collection(db, "despesas"); // ou o nome correto
-  const filtro = query(ref, where("uid", "==", uid));
+    const ref = collection(db, "despesas"); // ou o nome correto
+    const filtro = query(ref, where("uid", "==", uid));
 
-  const unsubscribe = onSnapshot(filtro, (querySnapshot) => {
-    console.log('🚨 querySnapshot recebida:', querySnapshot);
+    const unsubscribe = onSnapshot(filtro, (querySnapshot) => {
+      console.log('🚨 querySnapshot recebida:', querySnapshot);
 
-    const novosDados = querySnapshot.docs.map((doc) => {
-      const dados = doc.data();
-      console.log("Tipo:", dados.tipo);
+      const novosDados = querySnapshot.docs.map((doc) => {
+        const dados = doc.data();
+        console.log("Tipo:", dados.tipo);
 
-      return {
-        id: doc.id,
-        ...dados,
-        periodo: dados.periodo ? converterTimestamp(dados.periodo) : null,
-      };
+        return {
+          id: doc.id,
+          ...dados,
+          periodo: dados.periodo ? converterTimestamp(dados.periodo) : null,
+        };
+      });
+
+      console.log('✅ Dados processados:', novosDados);
+      setListaDados(novosDados);
     });
 
-    console.log('✅ Dados processados:', novosDados);
-    setListaDados(novosDados);
-  });
-
-  return unsubscribe;
-}
+    return unsubscribe;
+  }
 
 
   function converterTimestamp(dadoBruto) {
@@ -489,33 +520,33 @@ async function buscarDados() {
     }
   }
 
-function buscarPorTipo(uid, tipoDesejado, callback) {
-  if (!uid) {
-    console.warn("UID não fornecido");
-    return;
+  function buscarPorTipo(uid, tipoDesejado, callback) {
+    if (!uid) {
+      console.warn("UID não fornecido");
+      return;
+    }
+
+    const baseRef = ref; // assume que ref já é sua referência à coleção
+
+    // Verifica se tipo foi passado corretamente (string não vazia)
+    const filtro =
+      tipoDesejado && tipoDesejado.trim() !== ""
+        ? query(baseRef, where("tipo", "==", tipoDesejado), where("uid", "==", uid))
+        : query(baseRef, where("uid", "==", uid)); // sem filtro de tipo
+
+    const unsubscribe = onSnapshot(filtro, (querySnapshot) => {
+      const dadosFiltrados = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      console.log(`[DEBUG] Documentos do tipo "${tipoDesejado || "todos"}":`, dadosFiltrados);
+
+      if (callback) callback(dadosFiltrados);
+    });
+
+    return unsubscribe;
   }
-
-  const baseRef = ref; // assume que ref já é sua referência à coleção
-
-  // Verifica se tipo foi passado corretamente (string não vazia)
-  const filtro =
-    tipoDesejado && tipoDesejado.trim() !== ""
-      ? query(baseRef, where("tipo", "==", tipoDesejado), where("uid", "==", uid))
-      : query(baseRef, where("uid", "==", uid)); // sem filtro de tipo
-
-  const unsubscribe = onSnapshot(filtro, (querySnapshot) => {
-    const dadosFiltrados = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    console.log(`[DEBUG] Documentos do tipo "${tipoDesejado || "todos"}":`, dadosFiltrados);
-
-    if (callback) callback(dadosFiltrados);
-  });
-
-  return unsubscribe;
-}
 
 
   // CREATE - SALVAR
@@ -587,7 +618,7 @@ function buscarPorTipo(uid, tipoDesejado, callback) {
 
   // DELETE
   async function removerItem(id) {
-    
+
     const confirmacao = window.confirm('Tem certeza que deseja remover?');
     if (!confirmacao) return;
 
@@ -603,27 +634,37 @@ function buscarPorTipo(uid, tipoDesejado, callback) {
     }
   }
 
-  function identificarTipo(e){ 
+  function identificarTipo(e) {
     const tipoFiltro = e.target.value
 
     setTipoFiltro(tipoFiltro)
   }
 
-  function statusFiltros(status){
-    if(status == false){
+  function statusFiltros(status) {
+    if (status == false) {
       return "hidden"
     }
-    else{
+    else {
       console.log(status)
       return " "
     }
   }
   return (
     <>
-      <header>
-        <nav className='p-3 rounded-lg bg-[#f6f6f6] flex items-center'>
-          <img className="w-[50px] h-[50px]" src={padrao} alt="" />
-          <h1 className="text-start text-3xl font-bold">Minhas Despesas</h1>
+      <header >
+        <nav className='p-3 rounded-lg bg-[#f6f6f6] flex justify-around items-center min-w-[234px]'>
+          <span id="title" className="flex items-center w-full">
+            <img className="aspect-square w-[50px]" src={padrao} alt="" />
+            <h1 className="text-start text-2xl md:text-3xl font-bold w-full">Minhas Despesas</h1>
+          </span>
+
+          <span id="user" className="border-2  aspect-square max-w-[50px] w-[40px] bg-rose-500 rounded-full">
+            <img src={photoUrl} alt="photo_user" />
+          </span>
+
+          <button className="m-1 p-2" onClick={() => Deslogar()}>
+            <img className="aspect-square w-[35px] " src="src/assets/logout-48.png" alt="" />
+          </button>
         </nav>
       </header>
 
@@ -640,7 +681,7 @@ function buscarPorTipo(uid, tipoDesejado, callback) {
           <div className="card-dash bg-red-100 border-red-200" id="menos">
             <h1 className="text-start m-2">Depesas</h1>
             <p className='text-lg m-2'>
-              {formatarParaReais( CalcularDespesa(listaDespesa))}
+              {formatarParaReais(CalcularDespesa(listaDespesa))}
             </p>
           </div>
 
@@ -648,15 +689,15 @@ function buscarPorTipo(uid, tipoDesejado, callback) {
           <div className="card-dash" id="atual">
             <h1 className="text-start m-2">Saldo Atual</h1>
             <p className='text-lg m-2'>
-              {formatarParaReais(CalcularSaldo(receita,despesa))}
+              {formatarParaReais(CalcularSaldo(receita, despesa))}
             </p>
           </div>
 
         </section>
-        
+
         <section id="busca" className='flex flex-col items-center justify-center'>
           <div className="flex flex-row  w-[85%] mb-6 mt-6 justify-between">
-            
+
             <div id="buscar" className="flex flex-row items-center">
               <p className="mr-2">Buscar</p>
               <span id="filtros-busca" className={`flex flex-row max-w-[300px] w-full items-start justify-between`}>
@@ -676,34 +717,34 @@ function buscarPorTipo(uid, tipoDesejado, callback) {
               </button>
             </span>
           </div>
-          
-          <div className="flex flex-row  w-[85%] " >
-              <Disclosure as="div" className={"flex flex-col items-start"}>
-                {/* <span className='flex flex-col justify-center items-center'> */}
-                <DisclosureButton className='flex flex-row mt-[0px] ml-[1px] pl-[0px] justify-center items-center gap-2 g-transparent border-none outline-none shadow-none' onClick={(e) => setFiltros(!filtros)}>
-                  <p>Filtros</p>
-                  <svg className="w-[20px] h-[12px]" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 16-4 4-4-4"></path><path d="M17 20V4"></path><path d="m3 8 4-4 4 4"></path><path d="M7 4v16"></path></svg>
-                </DisclosureButton>
 
-                <DisclosurePanel className={`flex flex-row items-center`}>
+          <div className="flex flex-row  w-[85%] " >
+            <Disclosure as="div" className={"flex flex-col items-start"}>
+              {/* <span className='flex flex-col justify-center items-center'> */}
+              <DisclosureButton className='flex flex-row mt-[0px] ml-[1px] pl-[0px] justify-center items-center gap-2 g-transparent border-none outline-none shadow-none' onClick={(e) => setFiltros(!filtros)}>
+                <p>Filtros</p>
+                <svg className="w-[20px] h-[12px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 16-4 4-4-4"></path><path d="M17 20V4"></path><path d="m3 8 4-4 4 4"></path><path d="M7 4v16"></path></svg>
+              </DisclosureButton>
+
+              <DisclosurePanel className={`flex flex-row items-center`}>
                 {/* <div className={`flex flex-row items-center`}> */}
-                  <select name="" id="" onChange={(e)=> identificarTipo(e)}>
-                    <option className="" selected value=" ">------</option>
-                    <option className="" value="Receita">Receitas</option>
-                    <option className="" value="Despesa">Despesas</option>
-                  </select>
+                <select name="" id="" onChange={(e) => identificarTipo(e)}>
+                  <option className="" selected value=" ">------</option>
+                  <option className="" value="Receita">Receitas</option>
+                  <option className="" value="Despesa">Despesas</option>
+                </select>
                 {/* </div> */}
 
-                </DisclosurePanel>
-                {/* </span> */}
-              </Disclosure>
+              </DisclosurePanel>
+              {/* </span> */}
+            </Disclosure>
           </div>
 
         </section>
 
         {carregando ? (
           <p>Carregando usuario</p>
-        ): uid ? (
+        ) : uid ? (
           <section id="dados" className='p-4 rounded-lg bg-[#f6f6f6]' flex justify-between>
             <ul className="list-none gap-4 flex flex-wrap items-start justify-center">
               {aplicarFiltros(listaDados).map((item, index) => (
@@ -714,26 +755,26 @@ function buscarPorTipo(uid, tipoDesejado, callback) {
                 >
 
                   <span id="main" className="flex flex-col justify-around m-2">
-                      <span id="body-card" className="min-w-[120px] flex flex-row gap-[3rem]">
-                      
-                        <span id="header">
-                          <span id="img-header" className='flex flex-row items-start gap-2'>
-                            <img
-                              className='max-w-[25px] max-h-[25px] w-full h-full'
-                              src={getTipoImg(item.tipo)}
-                              alt=""
-                            />
-                            <span id="info-header" className='text-start'>
-                              <p className="" id="descricao">{item.descricao}</p>
-                              <hr className="border-t w-[100px] border-gray-300  " />
-                              <p>{formatarParaReais(item.valor)}</p>
-                            </span>
+                    <span id="body-card" className="min-w-[120px] flex flex-row gap-[3rem]">
+
+                      <span id="header">
+                        <span id="img-header" className='flex flex-row items-start gap-2'>
+                          <img
+                            className='max-w-[25px] max-h-[25px] w-full h-full'
+                            src={getTipoImg(item.tipo)}
+                            alt=""
+                          />
+                          <span id="info-header" className='text-start'>
+                            <p className="" id="descricao">{item.descricao}</p>
+                            <hr className="border-t w-[100px] border-gray-300  " />
+                            <p>{formatarParaReais(item.valor)}</p>
                           </span>
-          
                         </span>
 
+                      </span>
+
                       <span id="aside-card" className="flex flex-col max-w-[30px] justify-around max-h-[60px] min-w-[25px] min-h-[65px]">
-                    
+
                         <button className="p-1 m-1  max-w-[25px] max-h-[25px] w-full h-full" onClick={() => removerItem(item.id)}>
                           <img src={trash} className="" alt="" />
                         </button>
@@ -742,23 +783,23 @@ function buscarPorTipo(uid, tipoDesejado, callback) {
                           <img src={edit} alt="" />
                         </button>
 
-                      </span>                
-                      
                       </span>
-                
-                        <span id="footer-card" className='flex flex-row justify-around w-full max-h-[30px] h-full gap-1'>
-                          <p className={`max-h-[30px]  ${getCategoriaStyle(item.categoria)} border-2 p-1 rounded-lg`}>{item.categoria}</p>
-                          <p className='max-h-[50px] text-end pt-2 w-full'>{tratarPeriodo(item.periodo)}</p>
-                      
-                        </span>
+
+                    </span>
+
+                    <span id="footer-card" className='flex flex-row justify-around w-full max-h-[30px] h-full gap-1'>
+                      <p className={`max-h-[30px]  ${getCategoriaStyle(item.categoria)} border-2 p-1 rounded-lg`}>{item.categoria}</p>
+                      <p className='max-h-[50px] text-end pt-2 w-full'>{tratarPeriodo(item.periodo)}</p>
+
+                    </span>
                   </span>
 
                 </li>
               ))}
             </ul>
 
-          </section>          
-        ): (
+          </section>
+        ) : (
           <p>Nenhum usuario logado</p>
         )}
 
@@ -795,15 +836,16 @@ function buscarPorTipo(uid, tipoDesejado, callback) {
 
                 <label htmlFor="">Valor</label>
                 <span>
-                <label className="mr-1" htmlFor="">R$</label>
-                <input
-                  className="w-[150px]"
-                  type="text"
-                  value={dadosEdit.valor}
-                  onChange={(e) => {
-                    let valorFormatado = formatarParaReaisInput(e.target.value)
-                    setDadosEdit({ ...dadosEdit, valor: valorFormatado });                  }}
-                />
+                  <label className="mr-1" htmlFor="">R$</label>
+                  <input
+                    className="w-[150px]"
+                    type="text"
+                    value={dadosEdit.valor}
+                    onChange={(e) => {
+                      let valorFormatado = formatarParaReaisInput(e.target.value)
+                      setDadosEdit({ ...dadosEdit, valor: valorFormatado });
+                    }}
+                  />
 
                 </span>
 
