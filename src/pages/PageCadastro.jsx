@@ -13,6 +13,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 import { useEffect, useState } from 'react';
+import google_ico from '../assets/google-ico.png';
+
 export default function PageCadastro() {
     const provider = new GoogleAuthProvider();
     const navigate = useNavigate();
@@ -79,9 +81,6 @@ export default function PageCadastro() {
         <div className="bg-rose-300 flex flex-row justify-center items-center min-h-screen bg-[url('/sua-imagem.jpg')] bg-cover bg-no-repeat bg-center px-4">
             <div className="bg-white w-[90%] max-w-md min-w-[268px] h-[55%] p-6 flex flex-col items-center gap-2 justify-center border shadow-lg rounded-lg">
                 <h1 className="font-bold text-xl">Faça o seu cadastro</h1>
-                <span class="flex w-[100%] justify-end">
-                    <button class="flex  border-2" onClick={AtivarPopUp}>Cadastre-se com o Google</button>
-                </span>
 
 
                 <form action="" className="flex flex-col w-full" onSubmit={(e) => EnviarDados(e)}>
@@ -105,6 +104,19 @@ export default function PageCadastro() {
                         <Link to="/"><button type="button">Voltar para o Login</button></Link>
                         <button type="submit" className="border-2 w-full bg-green-500 border-green-600 font-bold text-white hover:bg-green-500/90 py-2 rounded">Criar conta</button>
                     </span>
+
+                    <button
+                    type="button"
+                    onClick={() => AtivarPopUp()}
+                    className="flex items-center justify-center w-full border-2 gap-2 py-2 rounded"
+                >
+                    <img
+                        className="max-w-[20px] max-h-[20px] w-full h-full p-1"
+                        src={google_ico}
+                        alt="Google"
+                    />
+                    Logar com o Google
+                </button>
 
                 </form>
             </div>
