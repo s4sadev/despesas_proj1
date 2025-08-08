@@ -658,9 +658,8 @@ export function Home() {
             <h1 className="text-start text-2xl md:text-3xl font-bold w-full">Minhas Despesas</h1>
           </span>
 
-          <span id="user" className="border-2  aspect-square max-w-[50px] w-[40px] bg-rose-500 rounded-full">
-            <img src={photoUrl} alt="photo_user" />
-          </span>
+            <img src={photoUrl} className="border-2  aspect-square max-w-[50px] w-[40px] bg-rose-500 rounded-full" alt="photo_user" />
+
 
           <button className="m-1 p-2" onClick={() => Deslogar()}>
             <img className="aspect-square w-[35px] " src="src/assets/logout-48.png" alt="" />
