@@ -17,7 +17,7 @@
       "purpose": "any maskable"
     },
     {
-      "src": "./icons/apple-icon-180x180.png",
+      "src": "./icons/ico_padrao_500x500.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -31,7 +31,7 @@
       "url": "./?action=new",
       "icons": [
         {
-          "src": "./icons/icon-192.png",
+          "src": "./icons/ico_padrao_192x192.png",
           "sizes": "192x192"
         }
       ]
