@@ -4,6 +4,8 @@ import edit from '../assets/edit.png'
 import receita_ico from '../assets/mais_card.png'
 import despesa_ico from '../assets/menos_card.png'
 import padrao from '../assets/ico_padrao.png'
+import logout_ico from '../assets/logout-48.png'
+import userIcoNull from '..assets/user_ico.png'
 import { useEffect, useState } from 'react';
 import '../App';
 import {
@@ -351,6 +353,10 @@ export function Home() {
         console.log("✅ UID carregado:", user.uid);
         console.log("Photo url", user.photoURL)
 
+        if(!user.photoURL){
+          setPhotoUrl(userIcoNull)
+        }
+
       } else {
         console.warn("Usuário não logado");
       }
@@ -662,7 +668,7 @@ export function Home() {
 
 
           <button className="m-1 p-2" onClick={() => Deslogar()}>
-            <img className="aspect-square w-[35px] " src="src/assets/logout-48.png" alt="" />
+            <img className="aspect-square w-[35px] " src={logout_ico} alt="sair" />
           </button>
         </nav>
       </header>
