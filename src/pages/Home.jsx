@@ -5,7 +5,9 @@ import receita_ico from '../assets/mais_card.png'
 import despesa_ico from '../assets/menos_card.png'
 import padrao from '../assets/ico_padrao.png'
 import logout_ico from '../assets/logout-48.png'
-import userIcoNull from '..assets/user_ico.png'
+
+import userIcoNull from '../assets/user_ico.png'
+
 import { useEffect, useState } from 'react';
 import '../App';
 import {
@@ -664,7 +666,9 @@ export function Home() {
             <h1 className="text-start text-2xl md:text-3xl font-bold w-full">Minhas Despesas</h1>
           </span>
 
-            <img src={photoUrl} className="border-2  aspect-square max-w-[50px] w-[40px] bg-rose-500 rounded-full" alt="photo_user" />
+            <span className="b">
+              <img src={photoUrl} className="border-2  aspect-square max-w-[50px] w-[40px] rounded-full" alt="photo_user" />
+            </span>
 
 
           <button className="m-1 p-2" onClick={() => Deslogar()}>
